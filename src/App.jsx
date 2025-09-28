@@ -195,7 +195,7 @@ function App() {
 
   return (
     <ChakraProvider>
-      <Router>
+      <Router basename="/spicy-reads-pwa">
         <Box minH="100vh" bg={appBg} pb="72px">
           <Routes>
             <Route
