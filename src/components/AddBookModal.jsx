@@ -297,22 +297,57 @@ export default function AddBookModal({
     reader.onload = async (ev) => {
       const dataUrl = ev.target.result;
       setCover(dataUrl);
-      // OCR logic
-      try {
-        const { data } = await Tesseract.recognize(dataUrl, "eng", {
-          logger: (m) => console.log(m),
-        });
-        const text = data.text;
-        // Simple heuristics: first line is likely title, second line is likely author
-        const lines = text
-          .split("\n")
-          .map((l) => l.trim())
-          .filter(Boolean);
-        if (lines.length > 0 && !title) setTitle(lines[0]);
-        if (lines.length > 1 && !author) setAuthor(lines[1]);
-      } catch (err) {
-        console.warn("OCR failed:", err);
-      }
+      // Preprocess image: grayscale and contrast boost
+      const preprocessImage = (src, callback) => {
+        const img = new window.Image();
+        img.crossOrigin = "Anonymous";
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          canvas.width = img.width;
+          canvas.height = img.height;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0);
+          // Grayscale
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          for (let i = 0; i < imageData.data.length; i += 4) {
+            const avg =
+              (imageData.data[i] +
+                imageData.data[i + 1] +
+                imageData.data[i + 2]) /
+              3;
+            // Contrast boost
+            const contrast = 1.4;
+            const contrasted = Math.min(
+              255,
+              Math.max(0, (avg - 128) * contrast + 128)
+            );
+            imageData.data[i] =
+              imageData.data[i + 1] =
+              imageData.data[i + 2] =
+                contrasted;
+          }
+          ctx.putImageData(imageData, 0, 0);
+          callback(canvas.toDataURL());
+        };
+        img.src = src;
+      };
+      preprocessImage(dataUrl, async (preprocessedUrl) => {
+        try {
+          const { data } = await Tesseract.recognize(preprocessedUrl, "eng", {
+            logger: (m) => console.log(m),
+          });
+          const text = data.text;
+          // Simple heuristics: first line is likely title, second line is likely author
+          const lines = text
+            .split("\n")
+            .map((l) => l.trim())
+            .filter(Boolean);
+          if (lines.length > 0 && !title) setTitle(lines[0]);
+          if (lines.length > 1 && !author) setAuthor(lines[1]);
+        } catch (err) {
+          console.warn("OCR failed:", err);
+        }
+      });
     };
     reader.readAsDataURL(file);
   };

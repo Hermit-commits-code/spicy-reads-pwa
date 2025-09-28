@@ -46,9 +46,11 @@ export default function BaseModal({
         <ModalCloseButton />
         <ModalBody
           sx={{
-            maxHeight: ["60vh", "80vh"],
+            maxHeight: ["calc(100vh - 32px)", "calc(100vh - 64px)"],
+            minHeight: ["40vh", "60vh"],
             overflowY: "auto",
             WebkitOverflowScrolling: "touch",
+            paddingBottom: 2,
           }}
         >
           {children}
