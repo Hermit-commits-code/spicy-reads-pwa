@@ -1,0 +1,51 @@
+import {
+  FormControl,
+  FormLabel,
+  Stack,
+  Slider,
+  SliderTrack,
+  SliderFilledTrack,
+  SliderThumb,
+  Text,
+} from "@chakra-ui/react";
+
+/**
+ * ReadingProgressField - Modular field for reading progress slider.
+ * Props:
+ *   readingProgress: number
+ *   setReadingProgress: function
+ *   t: translation function
+ */
+export default function ReadingProgressField({
+  readingProgress,
+  setReadingProgress,
+  t,
+}) {
+  return (
+    <FormControl>
+      <FormLabel>{t("reading_progress")}</FormLabel>
+      <Stack direction="row" align="center">
+        <Slider
+          min={0}
+          max={100}
+          step={1}
+          value={readingProgress}
+          onChange={setReadingProgress}
+          flex={1}
+          aria-label={t("reading_progress")}
+        >
+          <SliderTrack>
+            <SliderFilledTrack />
+          </SliderTrack>
+          <SliderThumb />
+        </Slider>
+        <Text minW="40px" textAlign="right">
+          {readingProgress}%
+        </Text>
+      </Stack>
+      <Text fontSize="xs" color="gray.500" mt={1}>
+        {t("reading_progress_hint", "How much of this book have you read?")}
+      </Text>
+    </FormControl>
+  );
+}
