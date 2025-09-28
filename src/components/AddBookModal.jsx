@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from "react";
+import Tesseract from "tesseract.js";
 import { useTranslation } from "react-i18next";
 import {
   Modal,
@@ -293,8 +294,25 @@ export default function AddBookModal({
     const file = e.target.files && e.target.files[0];
     if (!file) return;
     const reader = new window.FileReader();
-    reader.onload = (ev) => {
-      setCover(ev.target.result);
+    reader.onload = async (ev) => {
+      const dataUrl = ev.target.result;
+      setCover(dataUrl);
+      // OCR logic
+      try {
+        const { data } = await Tesseract.recognize(dataUrl, "eng", {
+          logger: (m) => console.log(m),
+        });
+        const text = data.text;
+        // Simple heuristics: first line is likely title, second line is likely author
+        const lines = text
+          .split("\n")
+          .map((l) => l.trim())
+          .filter(Boolean);
+        if (lines.length > 0 && !title) setTitle(lines[0]);
+        if (lines.length > 1 && !author) setAuthor(lines[1]);
+      } catch (err) {
+        console.warn("OCR failed:", err);
+      }
     };
     reader.readAsDataURL(file);
   };
