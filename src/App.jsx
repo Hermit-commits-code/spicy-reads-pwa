@@ -200,6 +200,9 @@ function App() {
     setBooks(await db.books.toArray());
   };
 
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 600;
+  const [fullscreenAdd, setFullscreenAdd] = useState(false);
+  const [fullscreenEdit, setFullscreenEdit] = useState(false);
   return (
     <ChakraProvider>
       <Router basename="/spicy-reads-pwa">
@@ -211,8 +214,13 @@ function App() {
                 <Home
                   books={books}
                   onEditBook={(book) => {
-                    setEditBook(book);
-                    setEditBookOpen(true);
+                    if (isMobile) {
+                      setEditBook(book);
+                      setFullscreenEdit(true);
+                    } else {
+                      setEditBook(book);
+                      setEditBookOpen(true);
+                    }
                   }}
                   onDeleteBook={handleDeleteBook}
                 />
@@ -238,15 +246,43 @@ function App() {
               }
             />
           </Routes>
-          <FloatingAddBook onClick={() => setAddBookOpen(true)} />
+          <FloatingAddBook
+            onClick={() => {
+              if (isMobile) {
+                setFullscreenAdd(true);
+              } else {
+                setAddBookOpen(true);
+              }
+            }}
+          />
           <BottomNav />
+          {/* Fullscreen add/edit for mobile */}
+          {fullscreenAdd && isMobile && (
+            <EditBookPage
+              onClose={() => setFullscreenAdd(false)}
+              onAdd={handleAddBook}
+              isEdit={false}
+            />
+          )}
+          {fullscreenEdit && isMobile && (
+            <EditBookPage
+              onClose={() => {
+                setFullscreenEdit(false);
+                setEditBook(null);
+              }}
+              onAdd={handleEditBook}
+              initialValues={editBook}
+              isEdit={true}
+            />
+          )}
+          {/* Modals for desktop/tablet */}
           <AddBookModal
-            opened={addBookOpen}
+            opened={addBookOpen && !isMobile}
             onClose={() => setAddBookOpen(false)}
             onAdd={handleAddBook}
           />
           <AddBookModal
-            opened={editBookOpen}
+            opened={editBookOpen && !isMobile}
             onClose={() => {
               setEditBookOpen(false);
               setEditBook(null);
