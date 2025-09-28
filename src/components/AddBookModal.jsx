@@ -544,7 +544,6 @@ export default function AddBookModal({
             id="book-cover-input"
             type="file"
             accept="image/*"
-            capture="environment"
             onChange={handleCoverChange}
             aria-label="Upload book cover"
             size="md"
