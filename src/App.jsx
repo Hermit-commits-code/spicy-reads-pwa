@@ -16,6 +16,7 @@ import { AddIcon } from "@chakra-ui/icons";
 import { AiFillHome } from "react-icons/ai";
 import { MdList, MdSettings, MdBarChart } from "react-icons/md";
 import { useState, useEffect } from "react";
+import EditBookPage from "./pages/EditBookPage";
 import Home from "./pages/Home";
 import Lists from "./pages/Lists";
 import Settings from "./pages/Settings";

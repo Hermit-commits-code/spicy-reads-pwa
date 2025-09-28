@@ -3,7 +3,6 @@ import AddBookModal from "../components/AddBookModal";
 
 // This page will be used for fullscreen add/edit on mobile
 export default function EditBookPage({
-  opened,
   onClose,
   onAdd,
   initialValues,
