@@ -32,22 +32,30 @@ export default function BaseModal({
   isCentered = true,
   ...rest
 }) {
+  // Use 'full' modal size for mobile devices
+  const modalSize =
+    typeof window !== "undefined" && window.innerWidth < 600 ? "full" : size;
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      size={size}
+      size={modalSize}
       isCentered={isCentered}
       {...rest}
     >
       <ModalOverlay />
-      <ModalContent>
+      <ModalContent
+        sx={{
+          borderRadius: [0, "md"],
+          m: [0, "auto"],
+        }}
+      >
         <ModalHeader>{title}</ModalHeader>
         <ModalCloseButton />
         <ModalBody
           sx={{
-            maxHeight: ["calc(100vh - 32px)", "calc(100vh - 64px)"],
-            minHeight: ["40vh", "60vh"],
+            maxHeight: ["100vh", "calc(100vh - 64px)"],
+            minHeight: ["60vh", "60vh"],
             overflowY: "auto",
             WebkitOverflowScrolling: "touch",
             paddingBottom: 2,
