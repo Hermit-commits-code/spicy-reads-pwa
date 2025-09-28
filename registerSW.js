@@ -1,0 +1,1 @@
+if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('/spicy-reads-pwa/sw.js', { scope: '/spicy-reads-pwa/' })})}
