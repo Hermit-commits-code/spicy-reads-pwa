@@ -38,7 +38,10 @@ export default function Home({ books, onEditBook, onDeleteBook }) {
     }, new Map())
   );
 
+  // Only open details modal if edit modal is NOT open
   const handleOpenDetails = (book) => {
+    // Prevent details modal if edit modal is open
+    if (window.editBookModalOpen) return;
     setSelectedBook(book);
     setDetailsOpen(true);
   };

@@ -155,6 +155,13 @@ function FloatingAddBook({ onClick }) {
 function App() {
   const [addBookOpen, setAddBookOpen] = useState(false);
   const [editBookOpen, setEditBookOpen] = useState(false);
+  // Track edit modal open globally
+  useEffect(() => {
+    window.editBookModalOpen = editBookOpen;
+    return () => {
+      window.editBookModalOpen = false;
+    };
+  }, [editBookOpen]);
   const [editBook, setEditBook] = useState(null);
   const [books, setBooks] = useState([]);
   const appBg = "gray.50";
