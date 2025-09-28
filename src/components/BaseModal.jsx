@@ -44,7 +44,15 @@ export default function BaseModal({
       <ModalContent>
         <ModalHeader>{title}</ModalHeader>
         <ModalCloseButton />
-        <ModalBody>{children}</ModalBody>
+        <ModalBody
+          sx={{
+            maxHeight: ["60vh", "80vh"],
+            overflowY: "auto",
+            WebkitOverflowScrolling: "touch",
+          }}
+        >
+          {children}
+        </ModalBody>
         {footer && <ModalFooter>{footer}</ModalFooter>}
       </ModalContent>
     </Modal>
