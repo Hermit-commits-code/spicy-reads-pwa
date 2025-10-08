@@ -20,7 +20,12 @@ const COMMON_MOODS = [
   "Other",
 ];
 
-export default function Home({ books, onEditBook, onDeleteBook }) {
+export default function Home({
+  books,
+  onEditBook,
+  onDeleteBook,
+  autoOpenAddBook,
+}) {
   const { t } = useTranslation();
   // Use theme tokens for colors
   const cardBg = "gray.50";
@@ -28,6 +33,15 @@ export default function Home({ books, onEditBook, onDeleteBook }) {
   const text = "gray.700";
   const [selectedBook, setSelectedBook] = useState(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
+
+  // Auto-open add book modal when coming from extension
+  React.useEffect(() => {
+    if (autoOpenAddBook) {
+      // Trigger the floating add book button click
+      const event = new CustomEvent("openAddBook");
+      window.dispatchEvent(event);
+    }
+  }, [autoOpenAddBook]);
   const recommended = getRecommendedBooks(books, { max: 5 });
   const groupedBooks = Array.from(
     books.reduce((acc, book) => {

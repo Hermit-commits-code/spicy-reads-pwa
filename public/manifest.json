@@ -1,11 +1,20 @@
 {
-  "name": "Spicy Reads",
-  "short_name": "SpicyReads",
-  "start_url": ".",
+  "name": "Spicy Reads - Book Tracking",
+  "short_name": "Spicy Reads",
+  "start_url": "/spicy-reads-pwa/",
   "display": "standalone",
-  "background_color": "#fff",
-  "theme_color": "#7c3aed",
-  "description": "A cozy book tracker for spicy readers.",
+  "background_color": "#fef7ed",
+  "theme_color": "#ef4444",
+  "description": "Track your books with spice ratings and visual shelves",
+  "share_target": {
+    "action": "/spicy-reads-pwa/add-book",
+    "method": "GET",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  },
   "icons": [
     {
       "src": "vite.svg",

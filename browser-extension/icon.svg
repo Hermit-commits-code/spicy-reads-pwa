@@ -1,0 +1,15 @@
+<!-- SVG icon for the browser extension -->
+<svg width="48" height="48" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+  <!-- Book icon with spicy theme -->
+  <rect x="12" y="8" width="24" height="32" rx="2" fill="#8B4513" stroke="#654321" stroke-width="1"/>
+  <rect x="14" y="10" width="20" height="28" fill="#DEB887"/>
+  
+  <!-- Book spine lines -->
+  <line x1="16" y1="12" x2="32" y2="12" stroke="#8B4513" stroke-width="1"/>
+  <line x1="16" y1="16" x2="30" y2="16" stroke="#8B4513" stroke-width="1"/>
+  <line x1="16" y1="20" x2="28" y2="20" stroke="#8B4513" stroke-width="1"/>
+  
+  <!-- Chili pepper icon -->
+  <path d="M28 24 Q32 26 34 30 Q36 34 32 36 Q28 34 26 30 L28 24" fill="#FF4500"/>
+  <circle cx="28" cy="24" r="1" fill="#228B22"/>
+</svg>

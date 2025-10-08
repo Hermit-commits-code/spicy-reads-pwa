@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Extension Test</title>
+    <style>
+      body {
+        font-family: Arial;
+        padding: 20px;
+      }
+      .test-section {
+        margin: 20px 0;
+        padding: 15px;
+        border: 1px solid #ccc;
+      }
+      .success {
+        background: #e8f5e8;
+      }
+      .error {
+        background: #fee;
+      }
+      button {
+        padding: 10px;
+        margin: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>🌶️ Spicy Reads Extension Debug</h2>
+
+    <div class="test-section">
+      <h3>Test URL Processing</h3>
+      <input
+        type="text"
+        id="testUrl"
+        placeholder="Enter Amazon/Goodreads URL"
+        style="width: 400px"
+      />
+      <button onclick="testUrl()">Test URL</button>
+      <div id="urlResult"></div>
+    </div>
+
+    <div class="test-section">
+      <h3>Test Current Page Detection</h3>
+      <button onclick="testCurrentPage()">Test Current Page</button>
+      <div id="pageResult"></div>
+    </div>
+
+    <div class="test-section">
+      <h3>Quick Links</h3>
+      <button onclick="openSpicyReads()">Open Spicy Reads</button>
+      <button onclick="testWithSampleData()">Test with Sample Book</button>
+    </div>
+
+    <script>
+      async function testUrl() {
+        const url = document.getElementById("testUrl").value;
+        const result = document.getElementById("urlResult");
+
+        if (!url) {
+          result.innerHTML = '<div class="error">Please enter a URL</div>';
+          return;
+        }
+
+        // Test URL pattern matching
+        const amazonPattern =
+          /amazon\.(com|co\.uk|ca|de|fr|it|es|co\.jp)\/.*\/dp\/([A-Z0-9]{10})/i;
+        const goodreadsPattern = /goodreads\.com\/book\/show\/(\d+)/i;
+
+        let extracted = null;
+
+        if (amazonPattern.test(url)) {
+          const match = url.match(amazonPattern);
+          extracted = {
+            type: "Amazon",
+            asin: match[2],
+            detected: true,
+          };
+        } else if (goodreadsPattern.test(url)) {
+          const match = url.match(goodreadsPattern);
+          extracted = {
+            type: "Goodreads",
+            bookId: match[1],
+            detected: true,
+          };
+        }
+
+        if (extracted) {
+          result.innerHTML = `
+                    <div class="success">
+                        <strong>✅ URL Detected:</strong><br>
+                        Type: ${extracted.type}<br>
+                        ID: ${extracted.asin || extracted.bookId}<br>
+                        <button onclick="processUrl('${url}')">Process This URL</button>
+                    </div>
+                `;
+        } else {
+          result.innerHTML = '<div class="error">❌ URL not recognized</div>';
+        }
+      }
+
+      function testCurrentPage() {
+        const result = document.getElementById("pageResult");
+        const currentUrl = window.location.href;
+
+        result.innerHTML = `
+                <div>
+                    <strong>Current URL:</strong> ${currentUrl}<br>
+                    <strong>Hostname:</strong> ${window.location.hostname}<br>
+                    <strong>Extension would detect:</strong> 
+                    ${
+                      currentUrl.includes("amazon.")
+                        ? "📚 Amazon Book Page"
+                        : currentUrl.includes("goodreads.")
+                        ? "📚 Goodreads Book Page"
+                        : "❌ Not a supported book page"
+                    }
+                </div>
+            `;
+      }
+
+      function processUrl(url) {
+        const spicyReadsUrl = `http://localhost:5173/spicy-reads-pwa/add-book?url=${encodeURIComponent(
+          url
+        )}`;
+        window.open(spicyReadsUrl, "_blank");
+      }
+
+      function openSpicyReads() {
+        window.open("http://localhost:5173/spicy-reads-pwa/", "_blank");
+      }
+
+      function testWithSampleData() {
+        const sampleUrl =
+          "http://localhost:5173/spicy-reads-pwa/add-book?" +
+          new URLSearchParams({
+            title: "Fourth Wing",
+            author: "Rebecca Yarros",
+            source: "Extension Test",
+            url: "https://amazon.com/Fourth-Wing-Rebecca-Yarros/dp/1649374046",
+          }).toString();
+
+        window.open(sampleUrl, "_blank");
+      }
+
+      // Auto-fill current page URL if it's a book page
+      window.onload = function () {
+        const currentUrl = window.location.href;
+        if (
+          currentUrl.includes("amazon.") ||
+          currentUrl.includes("goodreads.")
+        ) {
+          document.getElementById("testUrl").value = currentUrl;
+        }
+      };
+    </script>
+  </body>
+</html>

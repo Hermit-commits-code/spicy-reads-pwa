@@ -23,6 +23,7 @@ import Settings from "./pages/Settings";
 import Search from "./pages/Search";
 import Analytics from "./pages/Analytics";
 import AddBookModal from "./components/AddBookModal";
+import ShareHandler from "./components/ShareHandler";
 import RecommendationsPage from "./pages/Recommendations";
 import { getRecommendedBooks } from "./utils/recommendations";
 import db from "./db/booksDB";
@@ -172,6 +173,16 @@ function App() {
     db.books.toArray().then(setBooks);
   }, []);
 
+  // Listen for auto-open add book event from extension
+  useEffect(() => {
+    const handleOpenAddBook = () => {
+      setAddBookOpen(true);
+    };
+
+    window.addEventListener("openAddBook", handleOpenAddBook);
+    return () => window.removeEventListener("openAddBook", handleOpenAddBook);
+  }, []);
+
   const handleAddBook = async (book) => {
     const now = new Date().toISOString();
     await db.books.add({
@@ -207,6 +218,9 @@ function App() {
   return (
     <ChakraProvider>
       <Router basename="/spicy-reads-pwa">
+        {/* Handle URL parameters from browser extension */}
+        <ShareHandler />
+
         <Box minH="100vh" bg={appBg} pb="72px">
           <Routes>
             <Route
@@ -244,6 +258,25 @@ function App() {
               path="/recommendations"
               element={
                 <RecommendationsPage books={books} recommended={recommended} />
+              }
+            />
+            <Route
+              path="/add-book"
+              element={
+                <Home
+                  books={books}
+                  onEditBook={(book) => {
+                    if (isMobile) {
+                      setEditBook(book);
+                      setFullscreenEdit(true);
+                    } else {
+                      setEditBook(book);
+                      setEditBookOpen(true);
+                    }
+                  }}
+                  onDeleteBook={handleDeleteBook}
+                  autoOpenAddBook={true}
+                />
               }
             />
           </Routes>
@@ -297,5 +330,4 @@ function App() {
     </ChakraProvider>
   );
 }
-
 export default App;

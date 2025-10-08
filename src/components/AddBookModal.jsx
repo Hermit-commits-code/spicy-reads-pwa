@@ -1,5 +1,4 @@
 import { useState, useEffect, useMemo, useRef } from "react";
-import Tesseract from "tesseract.js";
 import { useTranslation } from "react-i18next";
 import {
   Modal,
@@ -39,6 +38,7 @@ import { startDictation } from "../utils/voiceDictation";
 import db from "../db/booksDB";
 import SeriesFields from "./SeriesFields";
 import FormModal from "./FormModal";
+import QuickAddBook from "./QuickAddBook";
 import {
   suggestMoods,
   suggestContentWarnings,
@@ -294,60 +294,9 @@ export default function AddBookModal({
     const file = e.target.files && e.target.files[0];
     if (!file) return;
     const reader = new window.FileReader();
-    reader.onload = async (ev) => {
+    reader.onload = (ev) => {
       const dataUrl = ev.target.result;
       setCover(dataUrl);
-      // Preprocess image: grayscale and contrast boost
-      const preprocessImage = (src, callback) => {
-        const img = new window.Image();
-        img.crossOrigin = "Anonymous";
-        img.onload = () => {
-          const canvas = document.createElement("canvas");
-          canvas.width = img.width;
-          canvas.height = img.height;
-          const ctx = canvas.getContext("2d");
-          ctx.drawImage(img, 0, 0);
-          // Grayscale
-          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-          for (let i = 0; i < imageData.data.length; i += 4) {
-            const avg =
-              (imageData.data[i] +
-                imageData.data[i + 1] +
-                imageData.data[i + 2]) /
-              3;
-            // Contrast boost
-            const contrast = 1.4;
-            const contrasted = Math.min(
-              255,
-              Math.max(0, (avg - 128) * contrast + 128)
-            );
-            imageData.data[i] =
-              imageData.data[i + 1] =
-              imageData.data[i + 2] =
-                contrasted;
-          }
-          ctx.putImageData(imageData, 0, 0);
-          callback(canvas.toDataURL());
-        };
-        img.src = src;
-      };
-      preprocessImage(dataUrl, async (preprocessedUrl) => {
-        try {
-          const { data } = await Tesseract.recognize(preprocessedUrl, "eng", {
-            logger: (m) => console.log(m),
-          });
-          const text = data.text;
-          // Simple heuristics: first line is likely title, second line is likely author
-          const lines = text
-            .split("\n")
-            .map((l) => l.trim())
-            .filter(Boolean);
-          if (lines.length > 0 && !title) setTitle(lines[0]);
-          if (lines.length > 1 && !author) setAuthor(lines[1]);
-        } catch (err) {
-          console.warn("OCR failed:", err);
-        }
-      });
     };
     reader.readAsDataURL(file);
   };
@@ -389,6 +338,35 @@ export default function AddBookModal({
     setReview(safeInitialValues.review || "");
     setNotes(safeInitialValues.notes || "");
   }, [safeInitialValues]);
+
+  // Check for extension book data when modal opens
+  useEffect(() => {
+    if (opened && !isEdit && window.extensionBookData) {
+      const bookData = window.extensionBookData;
+      console.log("Loading extension book data:", bookData);
+
+      if (bookData.title) setTitle(bookData.title);
+      if (bookData.author) setAuthor(bookData.author);
+      if (bookData.description) setDescription(bookData.description);
+      if (bookData.cover) setCover(bookData.cover);
+      if (bookData.sourceUrl) {
+        setNotes(`Source: ${bookData.sourceUrl}`);
+      }
+
+      // Set series information from extension
+      if (bookData.seriesName) {
+        setSeries(bookData.seriesName);
+        console.log("Set series name:", bookData.seriesName);
+      }
+      if (bookData.seriesNumber) {
+        setSeriesOrder(parseInt(bookData.seriesNumber, 10));
+        console.log("Set series number:", bookData.seriesNumber);
+      }
+
+      // Clear the data after using it
+      window.extensionBookData = null;
+    }
+  }, [opened, isEdit]);
 
   const handleAddCustomWarning = () => {
     if (customWarning && !contentWarnings.includes(customWarning)) {
@@ -588,6 +566,51 @@ export default function AddBookModal({
             </HStack>
           </Box>
         )}
+
+        {/* Quick Add Book - Only for new books */}
+        {!isEdit && (
+          <Box mb={4} p={4} borderWidth="1px" borderRadius="md" bg="blue.50">
+            <Text fontWeight="bold" mb={3} color="blue.600">
+              {t("quick_add", "Quick Add Book")}
+            </Text>
+            <Text fontSize="sm" color="gray.600" mb={3}>
+              {t(
+                "quick_add_help",
+                "Scan ISBN, paste Amazon/Goodreads links, or search to auto-fill book details"
+              )}
+            </Text>
+            <QuickAddBook
+              onBookAdd={(bookData) => {
+                // Pre-fill form with book data from QuickAdd
+                if (bookData.title) setTitle(bookData.title);
+                if (bookData.author) setAuthor(bookData.author);
+                if (bookData.description) setDescription(bookData.description);
+                if (bookData.cover) setCover(bookData.cover);
+                if (bookData.genre) setGenre(bookData.genre);
+                if (bookData.subGenre) setSubGenre(bookData.subGenre);
+                if (bookData.isbn) {
+                  // Store ISBN in notes for reference
+                  setNotes(
+                    notes
+                      ? `${notes}\n\nISBN: ${bookData.isbn}`
+                      : `ISBN: ${bookData.isbn}`
+                  );
+                }
+
+                // Scroll down to show the filled form
+                setTimeout(() => {
+                  const formElement = document.querySelector(
+                    '[role="dialog"] form, [role="dialog"] .chakra-modal__body'
+                  );
+                  if (formElement) {
+                    formElement.scrollTop = formElement.scrollHeight;
+                  }
+                }, 100);
+              }}
+            />
+          </Box>
+        )}
+
         {/* All form fields below */}
         <FormControl>
           <FormLabel htmlFor="book-cover-input">

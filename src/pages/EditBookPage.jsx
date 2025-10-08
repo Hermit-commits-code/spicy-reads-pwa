@@ -17,20 +17,26 @@ export default function EditBookPage({
         left: 0,
         width: "100vw",
         height: "100vh",
-        background: "white",
+        background: "#fff",
         zIndex: 9999,
         overflowY: "auto",
         WebkitOverflowScrolling: "touch",
         padding: "16px 0",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "flex-start",
       }}
     >
-      <AddBookModal
-        opened={true}
-        onClose={onClose}
-        onAdd={onAdd}
-        initialValues={initialValues}
-        isEdit={isEdit}
-      />
+      <div style={{ width: "100%", maxWidth: 480 }}>
+        <AddBookModal
+          opened={true}
+          onClose={onClose}
+          onAdd={onAdd}
+          initialValues={initialValues}
+          isEdit={isEdit}
+        />
+      </div>
     </div>
   );
 }

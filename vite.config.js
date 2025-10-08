@@ -9,7 +9,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["favicon.ico", "apple-touch-icon.png", "mask-icon.svg"],
+      includeAssets: ["favicon.ico", "vite.svg"],
       manifest: {
         name: "Spicy Reads - Book Tracking",
         short_name: "Spicy Reads",
@@ -18,24 +18,27 @@ export default defineConfig({
         background_color: "#fef7ed",
         display: "standalone",
         orientation: "portrait",
-        scope: "/",
-        start_url: "/",
+        scope: "/spicy-reads-pwa/",
+        start_url: "/spicy-reads-pwa/",
+        share_target: {
+          action: "/spicy-reads-pwa/add-book",
+          method: "GET",
+          params: {
+            title: "title",
+            text: "text",
+            url: "url",
+          },
+        },
         icons: [
           {
-            src: "pwa-192x192.png",
+            src: "vite.svg",
             sizes: "192x192",
-            type: "image/png",
+            type: "image/svg+xml",
           },
           {
-            src: "pwa-512x512.png",
+            src: "vite.svg",
             sizes: "512x512",
-            type: "image/png",
-          },
-          {
-            src: "pwa-512x512.png",
-            sizes: "512x512",
-            type: "image/png",
-            purpose: "any maskable",
+            type: "image/svg+xml",
           },
         ],
       },
