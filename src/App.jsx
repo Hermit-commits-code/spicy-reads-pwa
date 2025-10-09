@@ -173,7 +173,7 @@ function App() {
     db.books.toArray().then(setBooks);
   }, []);
 
-  // Listen for auto-open add book event from extension
+  // Listen for auto-open add book event
   useEffect(() => {
     const handleOpenAddBook = () => {
       setAddBookOpen(true);
@@ -218,7 +218,7 @@ function App() {
   return (
     <ChakraProvider>
       <Router basename="/spicy-reads-pwa">
-        {/* Handle URL parameters from browser extension */}
+        {/* Handle URL parameters */}
         <ShareHandler />
 
         <Box minH="100vh" bg={appBg} pb="72px">

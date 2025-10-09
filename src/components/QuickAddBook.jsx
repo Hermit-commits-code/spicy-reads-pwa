@@ -28,7 +28,7 @@ import {
   FiCheck,
   FiX,
 } from "react-icons/fi";
-import { extractBookFromUrl } from "../utils/bookUrlExtractor";
+// import removed: extractBookFromUrl
 import {
   fetchBookByISBN,
   searchBooks,
@@ -48,7 +48,6 @@ export default function QuickAddBook({ onBookAdd }) {
   const [selectedBook, setSelectedBook] = useState(null);
 
   // Input states
-  const [urlInput, setUrlInput] = useState("");
   const [searchInput, setSearchInput] = useState("");
   const [manualInput, setManualInput] = useState("");
   const [scannerActive, setScannerActive] = useState(false);
@@ -56,10 +55,9 @@ export default function QuickAddBook({ onBookAdd }) {
   const videoRef = useRef(null);
   const toast = useToast();
 
-  // Tab names and icons
+  // Tab names and icons (removed Paste Link)
   const tabs = [
     { name: "Scan ISBN", icon: FiCamera, key: "scan" },
-    { name: "Paste Link", icon: FiLink, key: "url" },
     { name: "Search", icon: FiSearch, key: "search" },
     { name: "Manual", icon: FiType, key: "manual" },
   ];
@@ -97,28 +95,7 @@ export default function QuickAddBook({ onBookAdd }) {
     }
   };
 
-  // Handle URL extraction
-  const handleUrlSubmit = async () => {
-    if (!urlInput.trim()) return;
-
-    setLoading(true);
-    setError("");
-
-    try {
-      const bookData = await extractBookFromUrl(urlInput.trim());
-      if (bookData) {
-        setSelectedBook(bookData);
-      } else {
-        setError(
-          "Could not extract book data from this URL. Try copying the book title and author instead."
-        );
-      }
-    } catch {
-      setError("Failed to process URL. Try manual entry.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  // (URL extraction removed)
 
   // Handle book search
   const handleSearch = async () => {
@@ -201,7 +178,14 @@ export default function QuickAddBook({ onBookAdd }) {
           >
             <TabList mb={4} justifyContent="center">
               {tabs.map((tab) => (
-                <Tab key={tab.key} fontSize="sm">
+                <Tab
+                  key={tab.key}
+                  fontSize="sm"
+                  px={5}
+                  py={2}
+                  borderRadius="full"
+                  _selected={{ bg: "red.500", color: "white" }}
+                >
                   <Box as={tab.icon} mr={1} />
                   {tab.name}
                 </Tab>
@@ -224,6 +208,8 @@ export default function QuickAddBook({ onBookAdd }) {
                       size="lg"
                       leftIcon={<FiCamera />}
                       isLoading={loading}
+                      borderRadius="full"
+                      px={8}
                     >
                       Start Scanning
                     </Button>
@@ -234,7 +220,7 @@ export default function QuickAddBook({ onBookAdd }) {
                         style={{
                           width: "100%",
                           maxWidth: "400px",
-                          borderRadius: "8px",
+                          borderRadius: "16px",
                         }}
                         autoPlay
                         playsInline
@@ -245,37 +231,13 @@ export default function QuickAddBook({ onBookAdd }) {
                         right={2}
                         size="sm"
                         colorScheme="red"
+                        borderRadius="full"
                         onClick={() => setScannerActive(false)}
                       >
                         Cancel
                       </Button>
                     </Box>
                   )}
-                </VStack>
-              </TabPanel>
-
-              {/* URL Tab */}
-              <TabPanel>
-                <VStack spacing={4}>
-                  <Text textAlign="center" color="gray.600">
-                    Paste a link from Amazon, Goodreads, or other book sites
-                  </Text>
-
-                  <Input
-                    placeholder="https://amazon.com/..."
-                    value={urlInput}
-                    onChange={(e) => setUrlInput(e.target.value)}
-                    onKeyPress={(e) => e.key === "Enter" && handleUrlSubmit()}
-                  />
-
-                  <Button
-                    onClick={handleUrlSubmit}
-                    colorScheme="red"
-                    isLoading={loading}
-                    disabled={!urlInput.trim()}
-                  >
-                    Extract Book Info
-                  </Button>
                 </VStack>
               </TabPanel>
 
@@ -326,14 +288,22 @@ export default function QuickAddBook({ onBookAdd }) {
                             />
                           )}
                           <Box flex={1}>
-                            <Text fontWeight="bold" fontSize="sm">
+                            <Text
+                              fontWeight="semibold"
+                              fontSize="md"
+                              color="red.700"
+                            >
                               {book.title}
                             </Text>
-                            <Text fontSize="xs" color="gray.600">
+                            <Text
+                              fontSize="sm"
+                              color="gray.600"
+                              fontWeight="medium"
+                            >
                               {book.author}
                             </Text>
                             {book.publishDate && (
-                              <Text fontSize="xs" color="gray.500">
+                              <Text fontSize="xs" color="gray.400">
                                 {book.publishDate}
                               </Text>
                             )}
@@ -402,11 +372,27 @@ export default function QuickAddBook({ onBookAdd }) {
                     {selectedBook.publishDate}
                   </Text>
                 )}
-                <Badge colorScheme="green" mt={2}>
+                <Badge
+                  colorScheme="purple"
+                  mt={2}
+                  borderRadius="full"
+                  px={3}
+                  py={1}
+                  fontWeight="bold"
+                  fontSize="0.85em"
+                >
                   {selectedBook.source}
                 </Badge>
                 {selectedBook.needsReview && (
-                  <Badge colorScheme="orange" ml={2}>
+                  <Badge
+                    colorScheme="orange"
+                    ml={2}
+                    borderRadius="full"
+                    px={3}
+                    py={1}
+                    fontWeight="bold"
+                    fontSize="0.85em"
+                  >
                     Review & Edit
                   </Badge>
                 )}

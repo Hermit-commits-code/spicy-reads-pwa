@@ -101,6 +101,29 @@ async function fetchFromLibraryOfCongress(isbn) {
 export async function searchBooks(query) {
   if (!query || query.length < 3) return [];
 
+  // Helper to normalize Open Library results
+  function mapOpenLibraryDoc(doc) {
+    return {
+      title: doc.title,
+      author: doc.author_name?.[0],
+      publishDate: doc.first_publish_year,
+      publisher: doc.publisher?.[0],
+      genre: doc.subject?.[0],
+      cover: doc.cover_i
+        ? `https://covers.openlibrary.org/b/id/${doc.cover_i}-L.jpg`
+        : undefined,
+      isbn: doc.isbn?.[0],
+      openLibraryId: doc.key,
+      seriesName: doc.series?.[0],
+      seriesNumber:
+        doc.series?.length > 0 ? doc.series[0].match(/(\d+)/)?.[1] || "" : "",
+      description: doc.subtitle || "",
+      source: "Open Library Search",
+    };
+  }
+
+  // Google Books search
+  let googleResults = [];
   try {
     const response = await fetch(
       `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(
@@ -108,27 +131,60 @@ export async function searchBooks(query) {
       )}&maxResults=10`
     );
     const data = await response.json();
-
-    if (!data.items) return [];
-
-    return data.items.map((item) => {
-      const book = item.volumeInfo;
-      return {
-        title: book.title,
-        author: book.authors?.[0],
-        publishDate: book.publishedDate,
-        publisher: book.publisher,
-        genre: book.categories?.[0],
-        cover: book.imageLinks?.thumbnail,
-        isbn: book.industryIdentifiers?.[0]?.identifier,
-        googleBooksId: item.id,
-        source: "Google Books Search",
-      };
-    });
+    if (data.items) {
+      googleResults = data.items.map((item) => {
+        const book = item.volumeInfo;
+        return {
+          title: book.title,
+          author: book.authors?.[0],
+          publishDate: book.publishedDate,
+          publisher: book.publisher,
+          genre: book.categories?.[0],
+          cover: book.imageLinks?.thumbnail || book.imageLinks?.smallThumbnail,
+          isbn: book.industryIdentifiers?.[0]?.identifier,
+          googleBooksId: item.id,
+          seriesName: book.seriesInfo?.bookDisplayNumber
+            ? book.seriesInfo?.series
+            : undefined,
+          seriesNumber: book.seriesInfo?.bookDisplayNumber,
+          description: book.description,
+          source: "Google Books Search",
+        };
+      });
+    }
   } catch (error) {
-    console.error("Book search failed:", error);
-    return [];
+    console.error("Google Books search failed:", error);
   }
+
+  // Open Library search
+  let openLibResults = [];
+  try {
+    const response = await fetch(
+      `https://openlibrary.org/search.json?q=${encodeURIComponent(
+        query
+      )}&limit=10`
+    );
+    const data = await response.json();
+    if (data.docs) {
+      openLibResults = data.docs.map(mapOpenLibraryDoc);
+    }
+  } catch (error) {
+    console.error("Open Library search failed:", error);
+  }
+
+  // Merge results: prefer Google Books, but add Open Library if not duplicate by ISBN
+  const seenIsbns = new Set();
+  const merged = [];
+  for (const book of googleResults) {
+    if (book.isbn) seenIsbns.add(book.isbn);
+    merged.push(book);
+  }
+  for (const book of openLibResults) {
+    if (!book.isbn || !seenIsbns.has(book.isbn)) {
+      merged.push(book);
+    }
+  }
+  return merged;
 }
 
 // Extract book info from text (manual input helper)

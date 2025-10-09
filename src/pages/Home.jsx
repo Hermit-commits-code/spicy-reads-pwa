@@ -34,7 +34,7 @@ export default function Home({
   const [selectedBook, setSelectedBook] = useState(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
 
-  // Auto-open add book modal when coming from extension
+  // Auto-open add book modal
   React.useEffect(() => {
     if (autoOpenAddBook) {
       // Trigger the floating add book button click

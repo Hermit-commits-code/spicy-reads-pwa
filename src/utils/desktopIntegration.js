@@ -49,22 +49,5 @@ console.log("Bookmarklet code (drag to bookmarks bar):");
 console.log(bookmarkletCode);
 
 // Also create a user-friendly browser extension concept
-const extensionManifest = {
-  manifest_version: 3,
-  name: "Spicy Reads Book Adder",
-  version: "1.0",
-  description: "Add books to Spicy Reads from any website",
-  permissions: ["activeTab"],
-  action: {
-    default_popup: "popup.html",
-    default_title: "Add to Spicy Reads",
-  },
-  content_scripts: [
-    {
-      matches: ["*://*.amazon.com/*", "*://*.goodreads.com/*"],
-      js: ["content.js"],
-    },
-  ],
-};
-
-export { bookmarkletCode, extensionManifest };
+// Extension concept removed
+export { bookmarkletCode };

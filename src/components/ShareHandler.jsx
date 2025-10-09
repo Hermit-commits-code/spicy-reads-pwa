@@ -1,7 +1,7 @@
 import { useShareHandler } from "../hooks/useShareHandler";
 
 /**
- * ShareHandler Component - Handles URL parameters from browser extension
+ * ShareHandler Component - Handles URL parameters
  * Must be inside Router context to use useLocation
  */
 export default function ShareHandler() {

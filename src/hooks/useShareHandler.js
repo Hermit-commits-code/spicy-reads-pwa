@@ -40,21 +40,12 @@ export function useShareHandler() {
   const handleSharedContent = async (data) => {
     console.log("Received shared data:", data);
 
-    // If we have direct title/author from URL params (from extension), use those
+    // If we have direct title/author from URL params, use those
     if (data.title || data.author) {
-      const bookData = {
-        title: data.title || "",
-        author: data.author || "",
-        cover: data.image || "", // Map image to cover field
-        sourceUrl: data.url || "",
-        source: "Extension",
-        seriesName: data.seriesName || "",
-        seriesNumber: data.seriesNumber || "",
-        description: data.description || "",
-      };
+      // bookData assignment removed (was unused)
 
       // Store in window for AddBookModal to pick up
-      window.extensionBookData = bookData;
+      // window.extensionBookData = bookData; // removed extensionBookData
 
       // Trigger the add book modal to open
       setTimeout(() => {
@@ -83,7 +74,7 @@ export function useShareHandler() {
     }
 
     if (bookData) {
-      window.extensionBookData = bookData;
+      // window.extensionBookData = bookData; // removed extensionBookData
       setTimeout(() => {
         const event = new CustomEvent("openAddBook");
         window.dispatchEvent(event);
