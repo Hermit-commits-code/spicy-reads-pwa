@@ -9,17 +9,17 @@ import {
   Text,
   VStack,
   HStack,
-} from "@chakra-ui/react";
-import { useState, useEffect } from "react";
-import db from "../db/booksDB";
+} from '@chakra-ui/react';
+import { useState, useEffect } from 'react';
+import db from '../db/booksDB';
 
 export default function Search({ books }) {
-  const [search, setSearch] = useState("");
-  const [genreFilter, setGenreFilter] = useState("");
+  const [search, setSearch] = useState('');
+  const [genreFilter, setGenreFilter] = useState('');
   const [spiceFilter, setSpiceFilter] = useState(0);
   const [ratingFilter, setRatingFilter] = useState(0);
   const [lists, setLists] = useState([]);
-  const [listFilter, setListFilter] = useState("");
+  const [listFilter, setListFilter] = useState('');
 
   useEffect(() => {
     db.lists.toArray().then(setLists);
@@ -33,8 +33,11 @@ export default function Search({ books }) {
     const matchesGenre = !genreFilter || book.genre === genreFilter;
     const matchesSpice = !spiceFilter || (book.spice || 0) >= spiceFilter;
     const matchesRating = !ratingFilter || (book.rating || 0) >= ratingFilter;
+    // Ensure listFilter and book.lists are compared as the same type (string)
     const matchesList =
-      !listFilter || (book.lists && book.lists.includes(listFilter));
+      !listFilter ||
+      (book.lists &&
+        book.lists.map((id) => String(id)).includes(String(listFilter)));
     return (
       matchesSearch &&
       matchesGenre &&
@@ -68,7 +71,7 @@ export default function Search({ books }) {
               <option key={g} value={g}>
                 {g}
               </option>
-            )
+            ),
           )}
         </Select>
         <Select
@@ -139,16 +142,58 @@ export default function Search({ books }) {
               bg="white"
               boxShadow="sm"
               display="flex"
-              flexDirection="column"
+              flexDirection="row"
               alignItems="center"
-              justifyContent="space-between"
+              justifyContent="flex-start"
+              gap={4}
               transition="box-shadow 0.2s"
-              _hover={{ boxShadow: "lg" }}
+              _hover={{ boxShadow: 'lg' }}
+              minH="80px"
             >
-              <Text fontWeight="bold">{book.title}</Text>
-              <Text fontSize="sm" color="gray.700">
-                {book.author}
-              </Text>
+              {book.cover ? (
+                <Box
+                  minW="56px"
+                  maxW="56px"
+                  maxH="80px"
+                  overflow="hidden"
+                  borderRadius="md"
+                  bg="gray.100"
+                >
+                  <img
+                    src={book.cover}
+                    alt={book.title ? `${book.title} cover` : 'Book cover'}
+                    style={{
+                      width: '56px',
+                      height: '80px',
+                      objectFit: 'cover',
+                      borderRadius: '6px',
+                    }}
+                  />
+                </Box>
+              ) : (
+                <Box
+                  minW="56px"
+                  maxW="56px"
+                  maxH="80px"
+                  borderRadius="md"
+                  bg="gray.100"
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                  color="gray.400"
+                  fontSize="sm"
+                >
+                  No Cover
+                </Box>
+              )}
+              <Box flex={1} minW={0}>
+                <Text fontWeight="bold" fontSize="md" mb={1} noOfLines={2}>
+                  {book.title && book.title.trim() ? book.title : 'Untitled'}
+                </Text>
+                <Text fontSize="sm" color="gray.700" isTruncated>
+                  {book.author}
+                </Text>
+              </Box>
             </Box>
           ))}
         </VStack>

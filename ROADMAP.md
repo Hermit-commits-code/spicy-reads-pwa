@@ -1,8 +1,8 @@
-# Spicy Reads - Book Tracking PWA Roadmap
+# VelvetVolumes - Book Tracking PWA Roadmap
 
 ## 🎯 Vision
 
-A mobile-first book tracking PWA that revolutionizes how readers discover, organize, and share their reading experiences with a focus on **spice levels** and **visual book shelves**.
+A mobile-first book tracking PWA that revolutionizes how readers discover, organize, and share their reading experiences with a focus on **spice levels** and **visual book shelves**. VelvetVolumes is for passionate readers who want more from their library.
 
 ## 🏆 Competitive Advantages & Unique Features
 

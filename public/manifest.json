@@ -1,13 +1,13 @@
 {
-  "name": "Spicy Reads - Book Tracking",
-  "short_name": "Spicy Reads",
-  "start_url": "/spicy-reads-pwa/",
+  "name": "VelvetVolumes - Book Tracking",
+  "short_name": "VelvetVolumes",
+  "start_url": "/velvet-volumes-pwa/",
   "display": "standalone",
   "background_color": "#fef7ed",
   "theme_color": "#ef4444",
   "description": "Track your books with spice ratings and visual shelves",
   "share_target": {
-    "action": "/spicy-reads-pwa/add-book",
+    "action": "/velvet-volumes-pwa/add-book",
     "method": "GET",
     "params": {
       "title": "title",

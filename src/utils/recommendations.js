@@ -1,4 +1,4 @@
-// Recommendation engine utility for Spicy Reads
+// Recommendation engine utility for VelvetVolumes
 // Suggests books based on user reading history, ratings, and tags
 // Exports: getRecommendedBooks
 
@@ -28,8 +28,8 @@ function getRecommendedBooks(books, options = {}) {
     (b.contentWarnings || []).forEach((w) => {
       tagCounts[w] = (tagCounts[w] || 0) + 0.5;
     });
-    if (typeof b.spice === "number")
-      tagCounts["spice:" + b.spice] = (tagCounts["spice:" + b.spice] || 0) + 1;
+    if (typeof b.spice === 'number')
+      tagCounts['spice:' + b.spice] = (tagCounts['spice:' + b.spice] || 0) + 1;
   });
   // 3. Score all books by tag overlap
   const scored = books.map((b) => {
@@ -43,8 +43,8 @@ function getRecommendedBooks(books, options = {}) {
     (b.contentWarnings || []).forEach((w) => {
       score += tagCounts[w] || 0;
     });
-    if (typeof b.spice === "number")
-      score += tagCounts["spice:" + b.spice] || 0;
+    if (typeof b.spice === 'number')
+      score += tagCounts['spice:' + b.spice] || 0;
     // Bonus for unrated/unread books
     if (!b.rating || b.rating < 3) score += 1;
     // Penalty for already read

@@ -1,5 +1,5 @@
 {
-  "name": "spicy-reads",
+  "name": "velvet-volumes",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -20,6 +20,7 @@
     "@tabler/icons-react": "^3.35.0",
     "dayjs": "^1.11.18",
     "dexie": "^4.2.0",
+    "firebase": "^12.4.0",
     "framer-motion": "^12.23.22",
     "i18next": "^25.5.2",
     "papaparse": "^5.5.3",

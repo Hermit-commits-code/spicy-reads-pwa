@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import {
   FormControl,
   FormLabel,
@@ -6,7 +6,7 @@ import {
   HStack,
   Button,
   Text,
-} from "@chakra-ui/react";
+} from '@chakra-ui/react';
 
 export default function BookTitleField({
   t,
@@ -26,31 +26,32 @@ export default function BookTitleField({
 }) {
   return (
     <FormControl isRequired>
-      <FormLabel htmlFor="book-title-input">{t("book_title")}</FormLabel>
+      <FormLabel htmlFor="book-title-input">{t('book_title')}</FormLabel>
       <HStack>
         <Input
           id="book-title-input"
+          name="book-title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          aria-label={t("book_title")}
+          aria-label={t('book_title')}
           autoComplete="off"
           size="md"
         />
         <Button
           size="sm"
           onClick={async () => {
-            setDictationError("");
-            setDictatingField("title");
+            setDictationError('');
+            setDictatingField('title');
             try {
               const transcript = await startDictation();
               setTitle(transcript);
             } catch (err) {
-              setDictationError("Voice input failed: " + (err?.message || err));
+              setDictationError('Voice input failed: ' + (err?.message || err));
             }
             setDictatingField(null);
           }}
-          aria-label={t("voice_input_title", "Voice input for title")}
-          isLoading={dictatingField === "title"}
+          aria-label={t('voice_input_title', 'Voice input for title')}
+          isLoading={dictatingField === 'title'}
         >
           🎤
         </Button>
@@ -59,7 +60,7 @@ export default function BookTitleField({
         mt={2}
         size="sm"
         onClick={async () => {
-          setBarcodeScanError("");
+          setBarcodeScanError('');
           setBarcodeModalOpen(true);
           await loadQuagga();
           setTimeout(() => {
@@ -70,17 +71,17 @@ export default function BookTitleField({
                 // Try to fetch book info from Open Library API
                 try {
                   const resp = await fetch(
-                    `https://openlibrary.org/api/books?bibkeys=ISBN:${code}&format=json&jscmd=data`
+                    `https://openlibrary.org/api/books?bibkeys=ISBN:${code}&format=json&jscmd=data`,
                   );
                   const data = await resp.json();
                   const book = data[`ISBN:${code}`];
                   if (book) {
-                    setTitle(book.title || "");
+                    setTitle(book.title || '');
                   } else {
-                    setBarcodeScanError("Book not found for scanned barcode.");
+                    setBarcodeScanError('Book not found for scanned barcode.');
                   }
                 } catch {
-                  setBarcodeScanError("Failed to fetch book info.");
+                  setBarcodeScanError('Failed to fetch book info.');
                 }
               });
             }
@@ -91,7 +92,7 @@ export default function BookTitleField({
             📷
           </span>
         }
-        aria-label={t("scan_barcode_info", "Scan barcode for book info")}
+        aria-label={t('scan_barcode_info', 'Scan barcode for book info')}
         variant="outline"
       >
         Scan Barcode

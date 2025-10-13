@@ -1,5 +1,5 @@
 /**
- * Spicy Reads Bookmarklet
+ * VelvetVolumes Bookmarklet
  * Drag this to your bookmarks bar to add books from any website
  */
 
@@ -37,15 +37,15 @@ javascript:(function(){
     }
   }
   
-  // Open Spicy Reads with the book information
-  const spicyReadsUrl = 'http://localhost:5173/spicy-reads-pwa/add-book?' + 
+  // Open VelvetVolumes with the book information
+  const velvetVolumesUrl = 'http://localhost:5173/velvet-volumes-pwa/add-book?' + 
     new URLSearchParams(bookInfo).toString();
   
-  window.open(spicyReadsUrl, 'spicyreads', 'width=500,height=700,scrollbars=yes');
+  window.open(velvetVolumesUrl, 'velvetvolumes', 'width=500,height=700,scrollbars=yes');
 })();
 `;
 
-console.log("Bookmarklet code (drag to bookmarks bar):");
+console.log('Bookmarklet code (drag to bookmarks bar):');
 console.log(bookmarkletCode);
 
 // Also create a user-friendly browser extension concept

@@ -1,260 +1,272 @@
-import { useState, useEffect, useRef } from "react";
-import { useTranslation } from "react-i18next";
-import BarcodeScanModal from "./addBook/BarcodeScanModal";
-import QuickAddSection from "./addBook/QuickAddSection";
-import BookCoverField from "./addBook/BookCoverField";
-import BookTitleField from "./addBook/BookTitleField";
-import BookAuthorField from "./addBook/BookAuthorField";
-import GenreField from "./addBook/GenreField";
-import DescriptionField from "./addBook/DescriptionField";
-import SpiceMeterField from "./addBook/SpiceMeterField";
-import StarRatingField from "./addBook/StarRatingField";
-import BookStatusField from "./addBook/BookStatusField";
-import ContentWarningsField from "./addBook/ContentWarningsField";
-import AssignListsField from "./addBook/AssignListsField";
-import ReadingProgressField from "./addBook/ReadingProgressField";
-import LastReadField from "./addBook/LastReadField";
-import MoodsField from "./addBook/MoodsField";
-import ReviewField from "./addBook/ReviewField";
-import NotesField from "./addBook/NotesField";
-import SeriesFields from "./SeriesFields";
-import FormModal from "./FormModal";
-import { stopBarcodeScan } from "../utils/barcodeScanner";
-import { startDictation } from "../utils/voiceDictation";
+import { Button } from '@chakra-ui/react';
 
-export default function AddBookModal({
-  opened,
-  onClose,
-  initialValues,
-  // isEdit removed
-}) {
+import { useTranslation } from 'react-i18next';
+import { useAddBookForm } from './addBook/useAddBookForm';
+import BarcodeScanModal from './addBook/BarcodeScanModal';
+import QuickAddSection from './addBook/QuickAddSection';
+import BookCoverField from './addBook/BookCoverField';
+import BookTitleField from './addBook/BookTitleField';
+import BookAuthorField from './addBook/BookAuthorField';
+import GenreField from './addBook/GenreField';
+import DescriptionField from './addBook/DescriptionField';
+import SpiceMeterField from './addBook/SpiceMeterField';
+import StarRatingField from './addBook/StarRatingField';
+import FormatsOwnedField from './addBook/FormatsOwnedField';
+import ContentWarningsField from './addBook/ContentWarningsField';
+import AssignListsField from './addBook/AssignListsField';
+import ReadingProgressField from './addBook/ReadingProgressField';
+import LastReadField from './addBook/LastReadField';
+import MoodsField from './addBook/MoodsField';
+import ReviewField from './addBook/ReviewField';
+import NotesField from './addBook/NotesField';
+import SeriesFields from './SeriesFields';
+import FormModal from './FormModal';
+
+import { stopBarcodeScan } from '../utils/barcodeScanner';
+import { startDictation } from '../utils/voiceDictation';
+import { COMMON_WARNINGS, COMMON_MOODS, GENRES } from './addBook/constants';
+
+import React, { useState } from 'react';
+
+export default function AddBookModal(props) {
+  const {
+    opened,
+    onClose,
+    initialValues,
+    onAdd, // callback to save book (renamed for consistency)
+    isEdit,
+  } = props;
   const { t } = useTranslation();
+  const form = useAddBookForm(initialValues || {});
+  const [error, setError] = useState(null);
 
-  // Constants
-  const COMMON_WARNINGS = [
-    "Sexual Content",
-    "Abuse",
-    "Death",
-    "Substance Use",
-    "Language",
-    "Other",
-  ];
-
-  const COMMON_MOODS = [
-    "Cozy",
-    "Dark",
-    "Funny",
-    "Adventurous",
-    "Emotional",
-    "Inspiring",
-    "Steamy",
-    "Chilling",
-    "Feel-Good",
-    "Heartbreaking",
-    "Other",
-  ];
-
-  const genres = [
-    {
-      value: "romance",
-      label: "Romance",
-      subGenres: [
-        "Contemporary",
-        "Historical",
-        "Paranormal",
-        "Gothic Romance",
-        "Romantic Comedy",
-        "Romantic Suspense",
-        "Fantasy Romance",
-        "LGBTQ+",
-        "Dark Romance",
-        "Erotica",
-        "Regency",
-        "Sports",
-        "Military",
-        "Billionaire",
-        "Other",
-      ],
-    },
-    // Add more genres as needed
-  ];
-
-  // Book status state
-  const [bookStatus, setBookStatus] = useState("");
-
-  // Handlers for custom warnings and moods
+  // Handlers for custom warnings and moods (now use form state)
   const handleAddCustomWarning = () => {
-    if (customWarning && !contentWarnings.includes(customWarning)) {
-      setContentWarnings([...contentWarnings, customWarning]);
-      setCustomWarning("");
+    if (
+      form.customWarning &&
+      !form.contentWarnings.includes(form.customWarning)
+    ) {
+      form.setContentWarnings([...form.contentWarnings, form.customWarning]);
+      form.setCustomWarning('');
     }
   };
-
   const handleRemoveWarning = (warning) => {
-    setContentWarnings(contentWarnings.filter((w) => w !== warning));
+    form.setContentWarnings(form.contentWarnings.filter((w) => w !== warning));
   };
-
   const handleAddCustomMood = () => {
-    if (customMood && !moods.includes(customMood)) {
-      setMoods([...moods, customMood]);
-      setCustomMood("");
+    const mood = form.customMood && form.customMood.trim();
+    if (mood && !form.moods.includes(mood)) {
+      form.setMoods([...form.moods, mood]);
+      form.setCustomMood('');
     }
   };
-
   const handleRemoveMood = (mood) => {
-    setMoods(moods.filter((m) => m !== mood));
+    form.setMoods(form.moods.filter((m) => m !== mood));
   };
-  // State for all fields
-  const [allLists] = useState([]);
-  const [selectedLists, setSelectedLists] = useState(
-    initialValues?.lists || []
+
+  // Save handler: collect all state and call onAdd
+  const handleSave = () => {
+    const book = {
+      ...initialValues, // preserve all fields from initialValues (for edit)
+      title: form.title,
+      author: form.author,
+      genre: form.genre,
+      subGenre: form.subGenre,
+      description: form.description,
+      spice: form.spice,
+      rating: form.rating,
+      formatsOwned: form.formatsOwned,
+      contentWarnings: form.contentWarnings,
+      cover: form.cover,
+      readingProgress: form.readingProgress,
+      lastRead: form.lastRead,
+      moods: form.moods,
+      series: form.series,
+      seriesOrder: form.seriesOrder,
+      notes: form.notes,
+      review: form.review,
+      lists: form.selectedLists,
+      createdAt: initialValues?.createdAt || Date.now(),
+      updatedAt: Date.now(),
+    };
+    if (onAdd) onAdd(book);
+    onClose();
+  };
+
+  const footer = (
+    <>
+      <Button colorScheme="red" onClick={handleSave}>
+        {t('save', 'Save')}
+      </Button>
+    </>
   );
-  // Used by QuickAddSection for autofill
-  // eslint-disable-next-line no-unused-vars
-  const [title, setTitle] = useState("");
-  const [author, setAuthor] = useState("");
-  const [genre, setGenre] = useState("");
-  const [subGenre, setSubGenre] = useState("");
-  const [description, setDescription] = useState("");
-  const [spice, setSpice] = useState(0);
-  const [rating, setRating] = useState(0);
-  const [contentWarnings, setContentWarnings] = useState([]);
-  const [customWarning, setCustomWarning] = useState("");
-  // Used by QuickAddSection for autofill
-  // eslint-disable-next-line no-unused-vars
-  const [cover, setCover] = useState("");
-  const [readingProgress, setReadingProgress] = useState(0);
-  const [lastRead, setLastRead] = useState("");
-  const [moods, setMoods] = useState([]);
-  const [customMood, setCustomMood] = useState("");
-  const [dictationError, setDictationError] = useState("");
-  const [dictatingField, setDictatingField] = useState(null);
-  const [barcodeModalOpen, setBarcodeModalOpen] = useState(false);
-  // barcodeScanError state removed (was unused)
-  const videoRef = useRef(null);
-  const [series, setSeries] = useState("");
-  const [seriesOrder, setSeriesOrder] = useState("");
-  const [notes, setNotes] = useState("");
-  const [review, setReview] = useState("");
 
-  useEffect(() => {
-    // setTitle removed
-    setAuthor(initialValues?.author || "");
-    setGenre(initialValues?.genre || "");
-    setSubGenre(initialValues?.subGenre || "");
-    setDescription(initialValues?.description || "");
-    setSpice(
-      typeof initialValues?.spice === "number" ? initialValues.spice : 0
+  let content;
+  try {
+    content = (
+      <>
+        <QuickAddSection
+          isEdit={!!isEdit}
+          t={t}
+          setTitle={form.setTitle}
+          setAuthor={form.setAuthor}
+          setDescription={form.setDescription}
+          setCover={form.setCover}
+          setGenre={form.setGenre}
+          setSubGenre={form.setSubGenre}
+          setNotes={form.setNotes}
+          setSeries={form.setSeries}
+          setSeriesOrder={form.setSeriesOrder}
+          notes={form.notes}
+        />
+        <BookTitleField
+          t={t}
+          title={form.title}
+          setTitle={form.setTitle}
+          dictationError={form.dictationError}
+          dictatingField={form.dictatingField}
+          setDictationError={form.setDictationError}
+          setDictatingField={form.setDictatingField}
+          startDictation={startDictation}
+          setBarcodeScanError={form.setBarcodeScanError}
+          setBarcodeModalOpen={form.setBarcodeModalOpen}
+          loadQuagga={form.loadQuagga}
+          videoRef={form.videoRef}
+          scanBarcode={form.scanBarcode}
+          stopBarcodeScan={stopBarcodeScan}
+        />
+        <BarcodeScanModal
+          isOpen={form.barcodeModalOpen}
+          onClose={() => {
+            form.setBarcodeModalOpen(false);
+            stopBarcodeScan();
+          }}
+          videoRef={form.videoRef}
+          t={t}
+        />
+        <BookAuthorField
+          t={t}
+          author={form.author}
+          setAuthor={form.setAuthor}
+          dictationError={form.dictationError}
+          dictatingField={form.dictatingField}
+          setDictationError={form.setDictationError}
+          setDictatingField={form.setDictatingField}
+          startDictation={startDictation}
+          idPrefix="main"
+        />
+        <GenreField
+          t={t}
+          genre={form.genre}
+          setGenre={form.setGenre}
+          subGenre={form.subGenre}
+          setSubGenre={form.setSubGenre}
+          genres={GENRES}
+          idPrefix="main"
+        />
+        <SeriesFields
+          series={form.series}
+          setSeries={form.setSeries}
+          seriesOrder={form.seriesOrder}
+          setSeriesOrder={form.setSeriesOrder}
+          idPrefix="main"
+        />
+        <DescriptionField
+          t={t}
+          description={form.description}
+          setDescription={form.setDescription}
+          idPrefix="main"
+        />
+        <SpiceMeterField
+          t={t}
+          spice={form.spice}
+          setSpice={form.setSpice}
+          idPrefix="main"
+        />
+        <StarRatingField
+          t={t}
+          rating={form.rating}
+          setRating={form.setRating}
+          idPrefix="main"
+        />
+        <FormatsOwnedField
+          idPrefix="main"
+          formatsOwned={form.formatsOwned}
+          setFormatsOwned={form.setFormatsOwned}
+        />
+        <ContentWarningsField
+          t={t}
+          idPrefix="main"
+          COMMON_WARNINGS={COMMON_WARNINGS}
+          contentWarnings={form.contentWarnings}
+          setContentWarnings={form.setContentWarnings}
+          customWarning={form.customWarning}
+          setCustomWarning={form.setCustomWarning}
+          handleAddCustomWarning={handleAddCustomWarning}
+          handleRemoveWarning={handleRemoveWarning}
+        />
+        <AssignListsField
+          t={t}
+          allLists={form.allLists}
+          selectedLists={form.selectedLists}
+          setSelectedLists={form.setSelectedLists}
+          idPrefix="main"
+        />
+        <ReadingProgressField
+          t={t}
+          readingProgress={form.readingProgress}
+          setReadingProgress={form.setReadingProgress}
+          idPrefix="main"
+        />
+        <LastReadField
+          t={t}
+          lastRead={form.lastRead}
+          setLastRead={form.setLastRead}
+          idPrefix="main"
+        />
+        <MoodsField
+          t={t}
+          COMMON_MOODS={COMMON_MOODS}
+          moods={form.moods}
+          setMoods={form.setMoods}
+          customMood={form.customMood}
+          setCustomMood={form.setCustomMood}
+          handleAddCustomMood={handleAddCustomMood}
+          handleRemoveMood={handleRemoveMood}
+          idPrefix="main"
+        />
+        <ReviewField
+          t={t}
+          review={form.review}
+          setReview={form.setReview}
+          idPrefix="main"
+        />
+        <NotesField
+          t={t}
+          notes={form.notes}
+          setNotes={form.setNotes}
+          idPrefix="main"
+        />
+        <BookCoverField
+          t={t}
+          cover={form.cover}
+          handleCoverChange={form.setCover}
+          title={form.title}
+          idPrefix="main"
+        />
+      </>
     );
-    setRating(
-      typeof initialValues?.rating === "number" ? initialValues.rating : 0
+  } catch (e) {
+    setError(e);
+    content = (
+      <div style={{ color: '#E53E3E', fontWeight: 'bold', padding: 16 }}>
+        Error rendering AddBookModal: {String(e)}
+      </div>
     );
-    setContentWarnings(initialValues?.contentWarnings || []);
-    setCustomWarning("");
-    // setCover removed
-    setReadingProgress(
-      typeof initialValues?.readingProgress === "number"
-        ? initialValues.readingProgress
-        : 0
-    );
-    setLastRead(
-      initialValues?.lastRead ? initialValues.lastRead.slice(0, 10) : ""
-    );
-    setMoods(initialValues?.moods || []);
-    setCustomMood("");
-  }, [initialValues]);
-
+  }
   return (
-    <FormModal isOpen={opened} onClose={onClose}>
-      <QuickAddSection
-        isEdit={false}
-        t={t}
-        setTitle={setTitle}
-        setAuthor={setAuthor}
-        setDescription={setDescription}
-        setCover={setCover}
-        setGenre={setGenre}
-        setSubGenre={setSubGenre}
-        setNotes={setNotes}
-        setSeries={setSeries}
-        setSeriesOrder={setSeriesOrder}
-        notes={notes}
-      />
-      <BarcodeScanModal
-        isOpen={barcodeModalOpen}
-        onClose={() => {
-          setBarcodeModalOpen(false);
-          stopBarcodeScan();
-        }}
-        videoRef={videoRef}
-        t={t}
-      />
-      <BookAuthorField
-        t={t}
-        author={author}
-        setAuthor={setAuthor}
-        dictationError={dictationError}
-        dictatingField={dictatingField}
-        setDictationError={setDictationError}
-        setDictatingField={setDictatingField}
-        startDictation={startDictation}
-      />
-      <GenreField
-        t={t}
-        genre={genre}
-        setGenre={setGenre}
-        subGenre={subGenre}
-        setSubGenre={setSubGenre}
-        genres={genres}
-      />
-      <SeriesFields
-        series={series}
-        setSeries={setSeries}
-        seriesOrder={seriesOrder}
-        setSeriesOrder={setSeriesOrder}
-      />
-      <DescriptionField
-        t={t}
-        description={description}
-        setDescription={setDescription}
-      />
-      <SpiceMeterField t={t} spice={spice} setSpice={setSpice} />
-      <StarRatingField t={t} rating={rating} setRating={setRating} />
-      <BookStatusField bookStatus={bookStatus} setBookStatus={setBookStatus} />
-      <ContentWarningsField
-        t={t}
-        COMMON_WARNINGS={COMMON_WARNINGS}
-        contentWarnings={contentWarnings}
-        setContentWarnings={setContentWarnings}
-        customWarning={customWarning}
-        setCustomWarning={setCustomWarning}
-        handleAddCustomWarning={handleAddCustomWarning}
-        handleRemoveWarning={handleRemoveWarning}
-      />
-      <AssignListsField
-        t={t}
-        allLists={allLists}
-        selectedLists={selectedLists}
-        setSelectedLists={setSelectedLists}
-      />
-      <ReadingProgressField
-        t={t}
-        readingProgress={readingProgress}
-        setReadingProgress={setReadingProgress}
-      />
-      <LastReadField t={t} lastRead={lastRead} setLastRead={setLastRead} />
-      <MoodsField
-        t={t}
-        COMMON_MOODS={COMMON_MOODS}
-        moods={moods}
-        setMoods={setMoods}
-        customMood={customMood}
-        setCustomMood={setCustomMood}
-        handleAddCustomMood={handleAddCustomMood}
-        handleRemoveMood={handleRemoveMood}
-      />
-      <ReviewField t={t} review={review} setReview={setReview} />
-      <NotesField t={t} notes={notes} setNotes={setNotes} />
+    <FormModal isOpen={opened} onClose={onClose} footer={footer}>
+      {content}
     </FormModal>
   );
 }

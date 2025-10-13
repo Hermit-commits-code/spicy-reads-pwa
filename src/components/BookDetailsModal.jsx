@@ -12,30 +12,33 @@ import {
   HStack,
   Tag,
   Box,
-} from "@chakra-ui/react";
-import SpiceMeter from "./SpiceMeter";
-import StarRating from "./StarRating";
+} from '@chakra-ui/react';
 
-import { useTranslation } from "react-i18next";
-import { useState, useEffect } from "react";
-import { useClipboard } from "@chakra-ui/react";
-import { getRecommendedBooks } from "../utils/recommendations";
-import db from "../db/booksDB";
+import FormatTag from './FormatTag';
+
+import SpiceMeter from './SpiceMeter';
+import StarRating from './StarRating';
+
+import { useTranslation } from 'react-i18next';
+import { useState, useEffect } from 'react';
+import { useClipboard } from '@chakra-ui/react';
+import { getRecommendedBooks } from '../utils/recommendations';
+import db from '../db/booksDB';
 
 function formatDate(dateStr) {
-  if (!dateStr) return "";
+  if (!dateStr) return '';
   const d = new Date(dateStr);
   return d.toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
   });
 }
 
 export default function BookDetailsModal({ book, opened, onClose }) {
   const { t } = useTranslation();
-  const [shareStatus, setShareStatus] = useState("");
-  const { onCopy, setValue: setClipboardValue } = useClipboard("");
+  const [shareStatus, setShareStatus] = useState('');
+  const { onCopy, setValue: setClipboardValue } = useClipboard('');
 
   // Contextual recommendations state
   const [similarBooks, setSimilarBooks] = useState([]);
@@ -59,30 +62,30 @@ export default function BookDetailsModal({ book, opened, onClose }) {
   const shareData = {
     title: book.title,
     text: `${book.title} by ${book.author}${
-      book.review ? `\n\nReview: ${book.review}` : ""
-    }${book.notes ? `\n\nNotes: ${book.notes}` : ""}`,
+      book.review ? `\n\nReview: ${book.review}` : ''
+    }${book.notes ? `\n\nNotes: ${book.notes}` : ''}`,
     // Optionally add a URL if you have a public link
     // url: window.location.href,
   };
 
   const handleShare = async () => {
-    setShareStatus("");
+    setShareStatus('');
     if (navigator.share) {
       try {
         await navigator.share(shareData);
-        setShareStatus("shared");
+        setShareStatus('shared');
       } catch {
-        setShareStatus("error");
+        setShareStatus('error');
       }
     } else {
       // Fallback: copy to clipboard
       setClipboardValue(
         `${shareData.title} by ${book.author}\n${
-          book.review ? `Review: ${book.review}\n` : ""
-        }${book.notes ? `Notes: ${book.notes}\n` : ""}`
+          book.review ? `Review: ${book.review}\n` : ''
+        }${book.notes ? `Notes: ${book.notes}\n` : ''}`,
       );
       onCopy();
-      setShareStatus("copied");
+      setShareStatus('copied');
     }
   };
 
@@ -98,7 +101,7 @@ export default function BookDetailsModal({ book, opened, onClose }) {
       <ModalContent
         role="dialog"
         aria-modal="true"
-        aria-label={t("book_details", "Book details") + ": " + book.title}
+        aria-label={t('book_details', 'Book details') + ': ' + book.title}
       >
         <ModalHeader>{book.title}</ModalHeader>
         <Box mb={2} textAlign="right">
@@ -106,44 +109,47 @@ export default function BookDetailsModal({ book, opened, onClose }) {
             size="sm"
             colorScheme="blue"
             onClick={handleShare}
-            aria-label={t("share", "Share book details")}
+            aria-label={t('share', 'Share book details')}
           >
-            {t("share", "Share")}
+            {t('share', 'Share')}
           </Button>
-          {shareStatus === "copied" && (
+          {shareStatus === 'copied' && (
             <Text fontSize="xs" color="green.500" ml={2} as="span">
-              {t("copied_to_clipboard", "Copied!")}
+              {t('copied_to_clipboard', 'Copied!')}
             </Text>
           )}
-          {shareStatus === "shared" && (
+          {shareStatus === 'shared' && (
             <Text fontSize="xs" color="green.500" ml={2} as="span">
-              {t("shared_success", "Shared!")}
+              {t('shared_success', 'Shared!')}
             </Text>
           )}
-          {shareStatus === "error" && (
+          {shareStatus === 'error' && (
             <Text fontSize="xs" color="red.500" ml={2} as="span">
-              {t("share_error", "Share failed")}
+              {t('share_error', 'Share failed')}
             </Text>
           )}
         </Box>
-        <ModalCloseButton aria-label={t("close", "Close")} />
+        <ModalCloseButton aria-label={t('close', 'Close')} />
         <ModalBody>
           <Heading
             as="h5"
             size="sm"
             mb={1}
-            aria-label={t("book_author", "Author") + ": " + book.author}
+            aria-label={t('book_author', 'Author') + ': ' + book.author}
           >
             {book.author}
           </Heading>
-          {(book.genre || book.subGenre) && (
+          {(book.genre ||
+            book.subGenre ||
+            (Array.isArray(book.formatsOwned) &&
+              book.formatsOwned.length > 0)) && (
             <HStack mb={2} spacing={2} flexWrap="wrap">
               {book.genre && (
                 <Tag
                   size="sm"
                   colorScheme="gray"
                   borderRadius="full"
-                  aria-label={t("book_genre", "Genre") + ": " + book.genre}
+                  aria-label={t('book_genre', 'Genre') + ': ' + book.genre}
                 >
                   {t(book.genre.toLowerCase(), book.genre)}
                 </Tag>
@@ -154,45 +160,53 @@ export default function BookDetailsModal({ book, opened, onClose }) {
                   colorScheme="gray"
                   borderRadius="full"
                   aria-label={
-                    t("book_subgenre", "Sub-genre") + ": " + book.subGenre
+                    t('book_subgenre', 'Sub-genre') + ': ' + book.subGenre
                   }
                 >
                   {t(book.subGenre.toLowerCase(), book.subGenre)}
                 </Tag>
               )}
+              {Array.isArray(book.formatsOwned) &&
+                book.formatsOwned.length > 0 &&
+                book.formatsOwned.map((format) => (
+                  <FormatTag key={format} format={format} />
+                ))}
             </HStack>
           )}
-          {book.description && (
-            <Text
-              fontSize="sm"
-              color="gray.700"
-              mb={2}
-              aria-label={
-                t("book_description", "Description") + ": " + book.description
-              }
-            >
-              {book.description}
-            </Text>
-          )}
+          <Text
+            fontSize="sm"
+            color="gray.700"
+            mb={2}
+            aria-label={
+              t('book_description', 'Description') +
+              ': ' +
+              (book.description ||
+                t('no_description', 'No description available'))
+            }
+          >
+            {book.description
+              ? book.description
+              : t('no_description', 'No description available')}
+          </Text>
           <HStack spacing={4} mb={2} align="center">
             <SpiceMeter value={book.spice || 0} readOnly size={5} />
             <StarRating value={book.rating || 0} readOnly size={5} />
           </HStack>
           {/* Reading Progress and Last Read */}
-          {typeof book.readingProgress === "number" &&
+          {typeof book.readingProgress === 'number' &&
             book.readingProgress > 0 && (
               <Box mb={2}>
                 <Text
                   fontSize="xs"
                   color="gray.500"
                   aria-label={
-                    t("reading_progress", "Reading Progress") +
-                    ": " +
+                    t('reading_progress', 'Reading Progress') +
+                    ': ' +
                     book.readingProgress +
-                    "%"
+                    '%'
                   }
                 >
-                  {t("progress", "Progress")}: {book.readingProgress}%
+                  {t('progress', 'Progress')}: {book.readingProgress}%
                 </Text>
               </Box>
             )}
@@ -202,17 +216,17 @@ export default function BookDetailsModal({ book, opened, onClose }) {
                 fontSize="xs"
                 color="gray.500"
                 aria-label={
-                  t("last_read", "Last read") + ": " + formatDate(book.lastRead)
+                  t('last_read', 'Last read') + ': ' + formatDate(book.lastRead)
                 }
               >
-                {t("last_read", "Last read")}: {formatDate(book.lastRead)}
+                {t('last_read', 'Last read')}: {formatDate(book.lastRead)}
               </Text>
             </Box>
           )}
           {book.contentWarnings && book.contentWarnings.length > 0 && (
             <Box mb={2}>
               <Text fontSize="xs" color="gray.500" mb={1}>
-                {t("content_warnings", "Content Warnings")}
+                {t('content_warnings', 'Content Warnings')}
               </Text>
               <HStack spacing={2} flexWrap="wrap">
                 {book.contentWarnings.map((warning) => (
@@ -222,7 +236,7 @@ export default function BookDetailsModal({ book, opened, onClose }) {
                     colorScheme="red"
                     borderRadius="full"
                     aria-label={
-                      t("content_warning", "Content warning") + ": " + warning
+                      t('content_warning', 'Content warning') + ': ' + warning
                     }
                   >
                     {t(warning.toLowerCase(), warning)}
@@ -235,7 +249,7 @@ export default function BookDetailsModal({ book, opened, onClose }) {
           {book.review && (
             <Box mb={2}>
               <Text fontSize="sm" color="gray.700" mb={1} fontWeight="bold">
-                {t("review", "Review")}
+                {t('review', 'Review')}
               </Text>
               <Text fontSize="sm" color="gray.700">
                 {book.review}
@@ -246,7 +260,7 @@ export default function BookDetailsModal({ book, opened, onClose }) {
           {book.notes && (
             <Box mb={2}>
               <Text fontSize="sm" color="gray.700" mb={1} fontWeight="bold">
-                {t("notes", "Notes")}
+                {t('notes', 'Notes')}
               </Text>
               <Text fontSize="sm" color="gray.700">
                 {book.notes}
@@ -258,7 +272,7 @@ export default function BookDetailsModal({ book, opened, onClose }) {
         {similarBooks && similarBooks.length > 0 && (
           <Box mt={4} mb={2}>
             <Text fontWeight="bold" fontSize="sm" mb={2} color="purple.700">
-              {t("you_might_also_like", "You might also like...")}
+              {t('you_might_also_like', 'You might also like...')}
             </Text>
             <HStack spacing={2} overflowX="auto">
               {similarBooks.map((rec) => (
@@ -282,7 +296,7 @@ export default function BookDetailsModal({ book, opened, onClose }) {
                     setTimeout(() => {
                       // Use a custom event or callback to open the modal for rec.id if needed
                       window.dispatchEvent(
-                        new CustomEvent("openBookDetails", { detail: rec.id })
+                        new CustomEvent('openBookDetails', { detail: rec.id }),
                       );
                     }, 250);
                   }}
@@ -314,9 +328,9 @@ export default function BookDetailsModal({ book, opened, onClose }) {
                       src={rec.cover}
                       alt={rec.title}
                       style={{
-                        width: "100%",
-                        height: "80px",
-                        objectFit: "cover",
+                        width: '100%',
+                        height: '80px',
+                        objectFit: 'cover',
                         borderRadius: 6,
                       }}
                     />
@@ -327,7 +341,7 @@ export default function BookDetailsModal({ book, opened, onClose }) {
                       textAlign="center"
                       px={2}
                     >
-                      {t("no_cover", "No Cover")}
+                      {t('no_cover', 'No Cover')}
                     </Text>
                   )}
                   <Text
@@ -354,8 +368,8 @@ export default function BookDetailsModal({ book, opened, onClose }) {
           </Box>
         )}
         <ModalFooter>
-          <Button onClick={onClose} aria-label={t("close", "Close")}>
-            {t("close", "Close")}
+          <Button onClick={onClose} aria-label={t('close', 'Close')}>
+            {t('close', 'Close')}
           </Button>
         </ModalFooter>
       </ModalContent>

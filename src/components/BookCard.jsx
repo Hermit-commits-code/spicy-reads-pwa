@@ -1,7 +1,7 @@
-import React from "react";
-import { Box, Text, Tag, TagLabel, HStack, IconButton } from "@chakra-ui/react";
-import BookStatusTag from "./BookStatusTag";
-import { EditIcon, DeleteIcon } from "@chakra-ui/icons";
+import React from 'react';
+import { Box, Text, Tag, TagLabel, HStack, IconButton } from '@chakra-ui/react';
+import FormatTag from './FormatTag';
+import { EditIcon, DeleteIcon } from '@chakra-ui/icons';
 
 export default function BookCard({
   book,
@@ -14,8 +14,8 @@ export default function BookCard({
 }) {
   return (
     <Box
-      minW={{ base: "120px", sm: "140px", md: "180px", lg: "200px" }}
-      maxW={{ base: "140px", sm: "160px", md: "200px", lg: "220px" }}
+      minW={{ base: '120px', sm: '140px', md: '180px', lg: '200px' }}
+      maxW={{ base: '140px', sm: '160px', md: '200px', lg: '220px' }}
       mr={0}
       p={{ base: 2, md: 4 }}
       borderWidth={1}
@@ -26,7 +26,7 @@ export default function BookCard({
       flexDirection="column"
       alignItems="center"
       justifyContent="space-between"
-      _hover={{ boxShadow: "lg" }}
+      _hover={{ boxShadow: 'lg' }}
       position="relative"
       color={text}
       fontFamily="body"
@@ -58,7 +58,7 @@ export default function BookCard({
       {/* Book cover image or fallback */}
       <Box
         w="100%"
-        h={{ base: "120px", sm: "140px", md: "180px", lg: "240px" }}
+        h={{ base: '120px', sm: '140px', md: '180px', lg: '240px' }}
         mb={2}
         borderRadius="md"
         overflow="hidden"
@@ -72,7 +72,7 @@ export default function BookCard({
           <img
             src={book.cover}
             alt={book.title}
-            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           />
         ) : (
           <Text fontSize="xs" color="gray.400" textAlign="center" px={2}>
@@ -81,9 +81,11 @@ export default function BookCard({
         )}
         {/* ...existing code... */}
       </Box>
-      {book.bookStatus && (
+      {Array.isArray(book.formatsOwned) && book.formatsOwned.length > 0 && (
         <Box mt={2} mb={1} display="flex" justifyContent="center" w="100%">
-          <BookStatusTag status={book.bookStatus} inline />
+          {book.formatsOwned.map((format) => (
+            <FormatTag key={format} format={format} />
+          ))}
         </Box>
       )}
       <Text

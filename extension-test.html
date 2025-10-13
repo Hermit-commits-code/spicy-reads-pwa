@@ -25,7 +25,7 @@
     </style>
   </head>
   <body>
-    <h2>🌶️ Spicy Reads Extension Debug</h2>
+    <h2>📚 VelvetVolumes Extension Debug</h2>
 
     <div class="test-section">
       <h3>Test URL Processing</h3>
@@ -47,14 +47,14 @@
 
     <div class="test-section">
       <h3>Quick Links</h3>
-      <button onclick="openSpicyReads()">Open Spicy Reads</button>
+      <button onclick="openVelvetVolumes()">Open VelvetVolumes</button>
       <button onclick="testWithSampleData()">Test with Sample Book</button>
     </div>
 
     <script>
       async function testUrl() {
-        const url = document.getElementById("testUrl").value;
-        const result = document.getElementById("urlResult");
+        const url = document.getElementById('testUrl').value;
+        const result = document.getElementById('urlResult');
 
         if (!url) {
           result.innerHTML = '<div class="error">Please enter a URL</div>';
@@ -71,14 +71,14 @@
         if (amazonPattern.test(url)) {
           const match = url.match(amazonPattern);
           extracted = {
-            type: "Amazon",
+            type: 'Amazon',
             asin: match[2],
             detected: true,
           };
         } else if (goodreadsPattern.test(url)) {
           const match = url.match(goodreadsPattern);
           extracted = {
-            type: "Goodreads",
+            type: 'Goodreads',
             bookId: match[1],
             detected: true,
           };
@@ -99,7 +99,7 @@
       }
 
       function testCurrentPage() {
-        const result = document.getElementById("pageResult");
+        const result = document.getElementById('pageResult');
         const currentUrl = window.location.href;
 
         result.innerHTML = `
@@ -108,48 +108,48 @@
                     <strong>Hostname:</strong> ${window.location.hostname}<br>
                     <strong>Extension would detect:</strong> 
                     ${
-                      currentUrl.includes("amazon.")
-                        ? "📚 Amazon Book Page"
-                        : currentUrl.includes("goodreads.")
-                        ? "📚 Goodreads Book Page"
-                        : "❌ Not a supported book page"
+                      currentUrl.includes('amazon.')
+                        ? '📚 Amazon Book Page'
+                        : currentUrl.includes('goodreads.')
+                        ? '📚 Goodreads Book Page'
+                        : '❌ Not a supported book page'
                     }
                 </div>
             `;
       }
 
       function processUrl(url) {
-        const spicyReadsUrl = `http://localhost:5173/spicy-reads-pwa/add-book?url=${encodeURIComponent(
-          url
+        const velvetVolumesUrl = `http://localhost:5173/velvet-volumes-pwa/add-book?url=${encodeURIComponent(
+          url,
         )}`;
-        window.open(spicyReadsUrl, "_blank");
+        window.open(velvetVolumesUrl, '_blank');
       }
 
-      function openSpicyReads() {
-        window.open("http://localhost:5173/spicy-reads-pwa/", "_blank");
+      function openVelvetVolumes() {
+        window.open('http://localhost:5173/velvet-volumes-pwa/', '_blank');
       }
 
       function testWithSampleData() {
         const sampleUrl =
-          "http://localhost:5173/spicy-reads-pwa/add-book?" +
+          'http://localhost:5173/velvet-volumes-pwa/add-book?' +
           new URLSearchParams({
-            title: "Fourth Wing",
-            author: "Rebecca Yarros",
-            source: "Extension Test",
-            url: "https://amazon.com/Fourth-Wing-Rebecca-Yarros/dp/1649374046",
+            title: 'Fourth Wing',
+            author: 'Rebecca Yarros',
+            source: 'Extension Test',
+            url: 'https://amazon.com/Fourth-Wing-Rebecca-Yarros/dp/1649374046',
           }).toString();
 
-        window.open(sampleUrl, "_blank");
+        window.open(sampleUrl, '_blank');
       }
 
       // Auto-fill current page URL if it's a book page
       window.onload = function () {
         const currentUrl = window.location.href;
         if (
-          currentUrl.includes("amazon.") ||
-          currentUrl.includes("goodreads.")
+          currentUrl.includes('amazon.') ||
+          currentUrl.includes('goodreads.')
         ) {
-          document.getElementById("testUrl").value = currentUrl;
+          document.getElementById('testUrl').value = currentUrl;
         }
       };
     </script>

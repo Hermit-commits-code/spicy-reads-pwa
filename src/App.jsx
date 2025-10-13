@@ -3,7 +3,7 @@ import {
   Routes,
   Route,
   NavLink,
-} from "react-router-dom";
+} from 'react-router-dom';
 import {
   ChakraProvider,
   Box,
@@ -11,30 +11,40 @@ import {
   Button,
   IconButton,
   Text,
-} from "@chakra-ui/react";
-import { AddIcon } from "@chakra-ui/icons";
-import { AiFillHome } from "react-icons/ai";
-import { MdList, MdSettings, MdBarChart } from "react-icons/md";
-import { useState, useEffect } from "react";
-import EditBookPage from "./pages/EditBookPage";
-import Home from "./pages/Home";
-import Lists from "./pages/Lists";
-import Settings from "./pages/Settings";
-import Search from "./pages/Search";
-import Analytics from "./pages/Analytics";
-import AddBookModal from "./components/AddBookModal";
-import ShareHandler from "./components/ShareHandler";
-import RecommendationsPage from "./pages/Recommendations";
-import { getRecommendedBooks } from "./utils/recommendations";
-import db from "./db/booksDB";
+} from '@chakra-ui/react';
+import { AddIcon } from '@chakra-ui/icons';
+import { AiFillHome } from 'react-icons/ai';
+import { MdList, MdSettings, MdBarChart } from 'react-icons/md';
+import { useState, useEffect } from 'react';
+import AuthModal from './components/AuthModal';
+import { useAuth } from './context/AuthContext';
+import EditBookPage from './pages/EditBookPage';
+import Home from './pages/Home';
+import Lists from './pages/Lists';
+import Settings from './pages/Settings';
+import Search from './pages/Search';
+import Analytics from './pages/Analytics';
+import AddBookModal from './components/AddBookModal';
+import { ErrorBoundary } from './components/ErrorBoundary';
+import ShareHandler from './components/ShareHandler';
+import RecommendationsPage from './pages/Recommendations';
+import { getRecommendedBooks } from './utils/recommendations';
+import db from './db/booksDB';
+import {
+  getUserBooks,
+  addUserBook,
+  updateUserBook,
+  deleteUserBook,
+  listenToUserBooks,
+} from './firebase/db';
 
-import { useTranslation } from "react-i18next";
+import { useTranslation } from 'react-i18next';
 function BottomNav() {
   const { t } = useTranslation();
-  const navBg = "white";
-  const navBorder = "#eee";
-  const iconColor = "gray.700";
-  const activeColor = "red.500";
+  const navBg = 'white';
+  const navBorder = '#eee';
+  const iconColor = 'gray.700';
+  const activeColor = 'red.500';
   return (
     <Flex
       as="nav"
@@ -50,85 +60,85 @@ function BottomNav() {
       justify="space-around"
       w="100%"
       role="navigation"
-      aria-label={t("main_navigation", "Main navigation")}
+      aria-label={t('main_navigation', 'Main navigation')}
     >
-      <NavLink to="/" style={{ textDecoration: "none" }}>
+      <NavLink to="/" style={{ textDecoration: 'none' }}>
         {({ isActive }) => (
           <Button
             variant="ghost"
             flexDir="column"
             alignItems="center"
             size="sm"
-            aria-label={t("home")}
+            aria-label={t('home')}
             color={isActive ? activeColor : iconColor}
             _hover={{ color: activeColor }}
           >
             <AiFillHome size={24} style={{ marginBottom: 2 }} />
-            <Text fontSize="xs">{t("home")}</Text>
+            <Text fontSize="xs">{t('home')}</Text>
           </Button>
         )}
       </NavLink>
-      <NavLink to="/search" style={{ textDecoration: "none" }}>
+      <NavLink to="/search" style={{ textDecoration: 'none' }}>
         {({ isActive }) => (
           <Button
             variant="ghost"
             flexDir="column"
             alignItems="center"
             size="sm"
-            aria-label={t("search")}
+            aria-label={t('search')}
             color={isActive ? activeColor : iconColor}
             _hover={{ color: activeColor }}
           >
             <MdList size={24} style={{ marginBottom: 2 }} />
-            <Text fontSize="xs">{t("search")}</Text>
+            <Text fontSize="xs">{t('search')}</Text>
           </Button>
         )}
       </NavLink>
-      <NavLink to="/lists" style={{ textDecoration: "none" }}>
+      <NavLink to="/lists" style={{ textDecoration: 'none' }}>
         {({ isActive }) => (
           <Button
             variant="ghost"
             flexDir="column"
             alignItems="center"
             size="sm"
-            aria-label={t("lists")}
+            aria-label={t('lists')}
             color={isActive ? activeColor : iconColor}
             _hover={{ color: activeColor }}
           >
             <MdList size={24} style={{ marginBottom: 2 }} />
-            <Text fontSize="xs">{t("lists")}</Text>
+            <Text fontSize="xs">{t('lists')}</Text>
           </Button>
         )}
       </NavLink>
-      <NavLink to="/analytics" style={{ textDecoration: "none" }}>
+      <NavLink to="/analytics" style={{ textDecoration: 'none' }}>
         {({ isActive }) => (
           <Button
             variant="ghost"
             flexDir="column"
             alignItems="center"
             size="sm"
-            aria-label={t("stats")}
+            aria-label={t('stats')}
             color={isActive ? activeColor : iconColor}
             _hover={{ color: activeColor }}
           >
             <MdBarChart size={24} style={{ marginBottom: 2 }} />
-            <Text fontSize="xs">{t("stats")}</Text>
+            <Text fontSize="xs">{t('stats')}</Text>
           </Button>
         )}
       </NavLink>
-      <NavLink to="/settings" style={{ textDecoration: "none" }}>
+      <NavLink to="/settings" style={{ textDecoration: 'none' }}>
         {({ isActive }) => (
           <Button
             variant="ghost"
             flexDir="column"
             alignItems="center"
             size="sm"
-            aria-label={t("settings")}
+            aria-label={t('settings')}
             color={isActive ? activeColor : iconColor}
             _hover={{ color: activeColor }}
           >
             <MdSettings size={24} style={{ marginBottom: 2 }} />
-            <Text fontSize="xs">{t("settings")}</Text>
+            <Text fontSize="xs">{t('settings')}</Text>
           </Button>
         )}
       </NavLink>
@@ -155,6 +165,8 @@ function FloatingAddBook({ onClick }) {
 }
 
 function App() {
+  const { user, loading, signOut } = useAuth();
+  const [authModalOpen, setAuthModalOpen] = useState(false);
   const [addBookOpen, setAddBookOpen] = useState(false);
   const [editBookOpen, setEditBookOpen] = useState(false);
   // Track edit modal open globally
@@ -166,12 +178,35 @@ function App() {
   }, [editBookOpen]);
   const [editBook, setEditBook] = useState(null);
   const [books, setBooks] = useState([]);
-  const appBg = "gray.50";
+  const appBg = 'gray.50';
   const recommended = getRecommendedBooks(books, { max: 20 });
 
+  // Sync books from Firestore if logged in, else use local DB
   useEffect(() => {
-    db.books.toArray().then(setBooks);
-  }, []);
+    let unsubscribe;
+    if (user) {
+      unsubscribe = listenToUserBooks(user.uid, (snapshot) => {
+        const cloudBooks = [];
+        snapshot.forEach((doc) => {
+          cloudBooks.push({ id: doc.id, ...doc.data() });
+        });
+        setBooks(cloudBooks);
+      });
+    } else {
+      db.books.toArray().then(setBooks);
+      // Listen for booksChanged event (e.g., after list assignments)
+      const handler = async () => {
+        setBooks(await db.books.toArray());
+      };
+      window.addEventListener('booksChanged', handler);
+      return () => {
+        window.removeEventListener('booksChanged', handler);
+      };
+    }
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
+  }, [user]);
 
   // Listen for auto-open add book event
   useEffect(() => {
@@ -179,49 +214,111 @@ function App() {
       setAddBookOpen(true);
     };
 
-    window.addEventListener("openAddBook", handleOpenAddBook);
-    return () => window.removeEventListener("openAddBook", handleOpenAddBook);
+    window.addEventListener('openAddBook', handleOpenAddBook);
+    return () => window.removeEventListener('openAddBook', handleOpenAddBook);
   }, []);
 
   const handleAddBook = async (book) => {
     const now = new Date().toISOString();
-    await db.books.add({
-      ...book,
-      createdAt: now,
-      updatedAt: now,
-    });
-    setBooks(await db.books.toArray());
+    if (user) {
+      await addUserBook(user.uid, {
+        ...book,
+        createdAt: now,
+        updatedAt: now,
+      });
+    } else {
+      await db.books.add({
+        ...book,
+        createdAt: now,
+        updatedAt: now,
+      });
+      setBooks(await db.books.toArray());
+    }
     setAddBookOpen(false);
   };
 
   const handleEditBook = async (book) => {
     if (!editBook) return;
     const now = new Date().toISOString();
-    await db.books.update(editBook.id, {
+    // Preserve cover unless user changed it (empty string means remove)
+    const coverToSave =
+      book.cover !== undefined && book.cover !== ''
+        ? book.cover
+        : editBook.cover || '';
+    const bookToSave = {
       ...editBook,
       ...book,
+      cover: coverToSave,
       updatedAt: now,
-    });
-    setBooks(await db.books.toArray());
-    setEditBookOpen(false);
-    setEditBook(null);
+    };
+    if (user) {
+      await updateUserBook(user.uid, editBook.id, bookToSave);
+    } else {
+      await db.books.update(editBook.id, bookToSave);
+      setBooks(await db.books.toArray());
+    }
+    setTimeout(() => {
+      setEditBookOpen(false);
+      setEditBook(null);
+      // Prevent details modal from opening after edit
+      if (window.editBookModalOpen) window.editBookModalOpen = false;
+      if (document.activeElement) document.activeElement.blur();
+      // Notify Home page to block details modal
+      window.dispatchEvent(new Event('editBookModalClosed'));
+    }, 100);
   };
 
   const handleDeleteBook = async (bookId) => {
-    await db.books.delete(bookId);
-    setBooks(await db.books.toArray());
+    if (user) {
+      await deleteUserBook(user.uid, bookId);
+    } else {
+      await db.books.delete(bookId);
+      setBooks(await db.books.toArray());
+    }
   };
 
-  const isMobile = typeof window !== "undefined" && window.innerWidth < 600;
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 600;
   const [fullscreenAdd, setFullscreenAdd] = useState(false);
   const [fullscreenEdit, setFullscreenEdit] = useState(false);
   return (
     <ChakraProvider>
-      <Router basename="/spicy-reads-pwa">
+      <Router basename="/velvet-volumes-pwa">
         {/* Handle URL parameters */}
         <ShareHandler />
 
         <Box minH="100vh" bg={appBg} pb="72px">
+          <Flex
+            justify="flex-end"
+            align="center"
+            p={2}
+            bg="white"
+            borderBottom="1px solid #eee"
+          >
+            {!loading && !user && (
+              <Button
+                colorScheme="red"
+                size="sm"
+                onClick={() => setAuthModalOpen(true)}
+              >
+                Sign In
+              </Button>
+            )}
+            {!loading && user && (
+              <Flex align="center" gap={2}>
+                <Text fontSize="sm" color="gray.600">
+                  {user.email || user.displayName}
+                </Text>
+                <Button
+                  colorScheme="gray"
+                  size="xs"
+                  variant="outline"
+                  onClick={signOut}
+                >
+                  Sign Out
+                </Button>
+              </Flex>
+            )}
+          </Flex>
           <Routes>
             <Route
               path="/"
@@ -310,20 +407,28 @@ function App() {
             />
           )}
           {/* Modals for desktop/tablet */}
-          <AddBookModal
-            opened={addBookOpen && !isMobile}
-            onClose={() => setAddBookOpen(false)}
-            onAdd={handleAddBook}
-          />
-          <AddBookModal
-            opened={editBookOpen && !isMobile}
-            onClose={() => {
-              setEditBookOpen(false);
-              setEditBook(null);
-            }}
-            onAdd={handleEditBook}
-            initialValues={editBook}
-            isEdit
+          <ErrorBoundary>
+            <AddBookModal
+              opened={addBookOpen && !isMobile}
+              onClose={() => setAddBookOpen(false)}
+              onAdd={handleAddBook}
+            />
+          </ErrorBoundary>
+          <ErrorBoundary>
+            <AddBookModal
+              opened={editBookOpen && !isMobile}
+              onClose={() => {
+                setEditBookOpen(false);
+                setEditBook(null);
+              }}
+              onAdd={handleEditBook}
+              initialValues={editBook}
+              isEdit
+            />
+          </ErrorBoundary>
+          <AuthModal
+            isOpen={authModalOpen}
+            onClose={() => setAuthModalOpen(false)}
           />
         </Box>
       </Router>
