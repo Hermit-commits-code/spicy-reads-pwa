@@ -304,6 +304,10 @@ function MainLayout() {
       await db.books.delete(bookId);
       setBooks(await db.books.toArray());
     }
+    // Prevent details modal from opening after delete
+    if (window.editBookModalOpen) window.editBookModalOpen = false;
+    if (document.activeElement) document.activeElement.blur();
+    window.dispatchEvent(new Event('editBookModalClosed'));
   };
 
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 600;

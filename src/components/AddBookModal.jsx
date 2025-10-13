@@ -26,7 +26,7 @@ import { stopBarcodeScan } from '../utils/barcodeScanner';
 import { startDictation } from '../utils/voiceDictation';
 import { COMMON_WARNINGS, COMMON_MOODS, GENRES } from './addBook/constants';
 
-import React, { useState } from 'react';
+import React, { useState, useId } from 'react';
 
 export default function AddBookModal(props) {
   const {
@@ -39,6 +39,7 @@ export default function AddBookModal(props) {
   const { t } = useTranslation();
   const form = useAddBookForm(initialValues || {});
   const [error, setError] = useState(null);
+  const idPrefix = useId();
 
   // Handlers for custom warnings and moods (now use form state)
   const handleAddCustomWarning = () => {
@@ -125,6 +126,7 @@ export default function AddBookModal(props) {
           setSeries={form.setSeries}
           setSeriesOrder={form.setSeriesOrder}
           notes={form.notes}
+          idPrefix={idPrefix}
         />
         <BookTitleField
           t={t}
@@ -141,6 +143,7 @@ export default function AddBookModal(props) {
           videoRef={form.videoRef}
           scanBarcode={form.scanBarcode}
           stopBarcodeScan={stopBarcodeScan}
+          idPrefix={idPrefix}
         />
         <BarcodeScanModal
           isOpen={form.barcodeModalOpen}
@@ -160,7 +163,7 @@ export default function AddBookModal(props) {
           setDictationError={form.setDictationError}
           setDictatingField={form.setDictatingField}
           startDictation={startDictation}
-          idPrefix="main"
+          idPrefix={idPrefix}
         />
         <GenreField
           t={t}
@@ -169,97 +172,96 @@ export default function AddBookModal(props) {
           subGenre={form.subGenre}
           setSubGenre={form.setSubGenre}
           genres={GENRES}
-          idPrefix="main"
+          idPrefix={idPrefix}
         />
         <SeriesFields
           series={form.series}
           setSeries={form.setSeries}
           seriesOrder={form.seriesOrder}
           setSeriesOrder={form.setSeriesOrder}
-          idPrefix="main"
+          idPrefix={idPrefix}
         />
         <DescriptionField
           t={t}
           description={form.description}
           setDescription={form.setDescription}
-          idPrefix="main"
+          idPrefix={idPrefix}
         />
         <SpiceMeterField
           t={t}
           spice={form.spice}
           setSpice={form.setSpice}
-          idPrefix="main"
+          idPrefix={idPrefix}
         />
         <StarRatingField
           t={t}
           rating={form.rating}
           setRating={form.setRating}
-          idPrefix="main"
+          idPrefix={idPrefix}
         />
         <FormatsOwnedField
-          idPrefix="main"
+          t={t}
           formatsOwned={form.formatsOwned}
           setFormatsOwned={form.setFormatsOwned}
+          idPrefix={idPrefix}
         />
         <ContentWarningsField
           t={t}
-          idPrefix="main"
-          COMMON_WARNINGS={COMMON_WARNINGS}
           contentWarnings={form.contentWarnings}
           setContentWarnings={form.setContentWarnings}
           customWarning={form.customWarning}
           setCustomWarning={form.setCustomWarning}
           handleAddCustomWarning={handleAddCustomWarning}
           handleRemoveWarning={handleRemoveWarning}
+          idPrefix={idPrefix}
         />
         <AssignListsField
           t={t}
           allLists={form.allLists}
           selectedLists={form.selectedLists}
           setSelectedLists={form.setSelectedLists}
-          idPrefix="main"
+          idPrefix={idPrefix}
         />
         <ReadingProgressField
           t={t}
           readingProgress={form.readingProgress}
           setReadingProgress={form.setReadingProgress}
-          idPrefix="main"
+          idPrefix={idPrefix}
         />
         <LastReadField
           t={t}
           lastRead={form.lastRead}
           setLastRead={form.setLastRead}
-          idPrefix="main"
+          idPrefix={idPrefix}
         />
         <MoodsField
           t={t}
-          COMMON_MOODS={COMMON_MOODS}
           moods={form.moods}
           setMoods={form.setMoods}
           customMood={form.customMood}
           setCustomMood={form.setCustomMood}
           handleAddCustomMood={handleAddCustomMood}
           handleRemoveMood={handleRemoveMood}
-          idPrefix="main"
+          idPrefix={idPrefix}
         />
         <ReviewField
           t={t}
           review={form.review}
           setReview={form.setReview}
-          idPrefix="main"
+          idPrefix={idPrefix}
         />
         <NotesField
           t={t}
           notes={form.notes}
           setNotes={form.setNotes}
-          idPrefix="main"
+          idPrefix={idPrefix}
         />
         <BookCoverField
           t={t}
           cover={form.cover}
           handleCoverChange={form.setCover}
           title={form.title}
-          idPrefix="main"
+          idPrefix={idPrefix}
         />
       </>
     );
