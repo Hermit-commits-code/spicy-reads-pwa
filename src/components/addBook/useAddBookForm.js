@@ -41,8 +41,10 @@ export function useAddBookForm(initialValues = {}) {
 
   // Sync fields with initialValues on change
   useEffect(() => {
+    let changed = false;
     Object.entries(fields).forEach(([key, [value, setter]]) => {
       if (initialValues[key] !== undefined && initialValues[key] !== value) {
+        changed = true;
         if (key === 'spice' || key === 'rating' || key === 'readingProgress') {
           setter(
             typeof initialValues[key] === 'number' ? initialValues[key] : 0,
@@ -56,9 +58,10 @@ export function useAddBookForm(initialValues = {}) {
         }
       }
     });
-    setDictationError('');
-    setDictatingField(null);
-  }, [initialValues]);
+    // Only reset dictation state if changed
+    if (dictationError) setDictationError('');
+    if (dictatingField) setDictatingField(null);
+  }, [JSON.stringify(initialValues)]);
 
   // Return all fields and setters, plus lists and modal state
   return {

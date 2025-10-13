@@ -8,7 +8,7 @@ import {
 } from '../firebase/auth';
 import { ensureUserProfile } from '../firebase/userProfile';
 import { doc, getDoc } from 'firebase/firestore';
-import db from '../firebase/db';
+import { db as firestoreDb } from '../firebase/db';
 
 const AuthContext = createContext();
 
@@ -25,7 +25,7 @@ export function AuthProvider({ children }) {
         await ensureUserProfile(firebaseUser);
         // Fetch premium flag from Firestore
         try {
-          const userRef = doc(db, 'users', firebaseUser.uid);
+          const userRef = doc(firestoreDb, 'users', firebaseUser.uid);
           const userSnap = await getDoc(userRef);
           if (userSnap.exists()) {
             const data = userSnap.data();

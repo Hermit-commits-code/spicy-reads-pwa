@@ -18,7 +18,7 @@ import {
   doc,
   setDoc,
 } from 'firebase/firestore';
-import db from '../firebase/db';
+import { db as firestoreDb } from '../firebase/db';
 
 export default function AdminPanel() {
   const [searchEmail, setSearchEmail] = useState('');
@@ -31,7 +31,7 @@ export default function AdminPanel() {
     setUser(null);
     try {
       const q = query(
-        collection(db, 'users'),
+        collection(firestoreDb, 'users'),
         where('email', '==', searchEmail),
       );
       const snap = await getDocs(q);
@@ -50,11 +50,10 @@ export default function AdminPanel() {
     if (!user) return;
     const newValue = !user[field];
     try {
-      await setDoc(
-        doc(db, 'users', user.id),
-        { [field]: newValue },
-        { merge: true },
-      );
+      const updates = { [field]: newValue };
+      await setDoc(doc(firestoreDb, 'users', user.id), updates, {
+        merge: true,
+      });
       setUser({ ...user, [field]: newValue });
       toast({
         title: `${field.charAt(0).toUpperCase() + field.slice(1)} updated`,

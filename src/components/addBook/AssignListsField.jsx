@@ -24,6 +24,7 @@ import {
   IconButton,
 } from '@chakra-ui/react';
 import { AddIcon, ChevronDownIcon } from '@chakra-ui/icons';
+import db from '../../db/booksDB';
 
 export default function AssignListsField({
   t,
@@ -38,7 +39,6 @@ export default function AssignListsField({
   const handleCreateList = async () => {
     if (!newListName.trim()) return;
     setCreating(true);
-    const db = (await import('../../db/booksDB')).default;
     const id = await db.lists.add({
       name: newListName.trim(),
       createdAt: Date.now(),

@@ -12,7 +12,7 @@ import {
 import { deleteUser } from 'firebase/auth';
 import { doc, deleteDoc, collection, getDocs } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
-import db from '../firebase/db';
+import { db as firestoreDb } from '../firebase/db';
 
 export default function DeleteAccountButton() {
   const { user } = useAuth();
@@ -28,13 +28,15 @@ export default function DeleteAccountButton() {
       // Delete all subcollections (books, lists, listBooks)
       const subcollections = ['books', 'lists', 'listBooks'];
       for (const sub of subcollections) {
-        const snap = await getDocs(collection(db, 'users', user.uid, sub));
+        const snap = await getDocs(
+          collection(firestoreDb, 'users', user.uid, sub),
+        );
         for (const docu of snap.docs) {
-          await deleteDoc(doc(db, 'users', user.uid, sub, docu.id));
+          await deleteDoc(doc(firestoreDb, 'users', user.uid, sub, docu.id));
         }
       }
       // Delete user document
-      await deleteDoc(doc(db, 'users', user.uid));
+      await deleteDoc(doc(firestoreDb, 'users', user.uid));
       // Delete Firebase Auth user
       await deleteUser(user);
       toast({ title: 'Account deleted', status: 'success' });

@@ -3,6 +3,7 @@ import {
   Routes,
   Route,
   NavLink,
+  useLocation,
 } from 'react-router-dom';
 import {
   ChakraProvider,
@@ -37,8 +38,8 @@ import {
   deleteUserBook,
   listenToUserBooks,
 } from './firebase/db';
-
 import { useTranslation } from 'react-i18next';
+
 function BottomNav() {
   const { t } = useTranslation();
   const navBg = 'white';
@@ -164,7 +165,8 @@ function FloatingAddBook({ onClick }) {
   );
 }
 
-function App() {
+function MainLayout() {
+  const location = useLocation();
   const { user, loading, signOut } = useAuth();
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [addBookOpen, setAddBookOpen] = useState(false);
@@ -219,21 +221,48 @@ function App() {
   }, []);
 
   const handleAddBook = async (book) => {
+    console.log('[DEBUG] handleAddBook called', book);
+    console.log('[DEBUG] db instance in App.jsx', db);
+    console.log('[DEBUG] db.books in App.jsx', db.books);
+    console.log(
+      '[DEBUG] db.books methods in App.jsx',
+      Object.getOwnPropertyNames(db.books),
+    );
+    console.log('[DEBUG] user value in handleAddBook:', user);
     const now = new Date().toISOString();
+    let firestoreError = null;
     if (user) {
-      await addUserBook(user.uid, {
-        ...book,
-        createdAt: now,
-        updatedAt: now,
-      });
+      console.log('[DEBUG] handleAddBook: user branch taken, using Firestore');
+      try {
+        await addUserBook(user.uid, {
+          ...book,
+          createdAt: now,
+          updatedAt: now,
+        });
+      } catch (err) {
+        firestoreError = err;
+        console.error('[DEBUG] Firestore addUserBook error:', err);
+      }
     } else {
-      await db.books.add({
-        ...book,
-        createdAt: now,
-        updatedAt: now,
-      });
-      setBooks(await db.books.toArray());
+      console.log('[DEBUG] handleAddBook: local branch taken, using Dexie');
     }
+    // Always write to Dexie for local Analytics and offline support
+    try {
+      const bookToAdd = { ...book, createdAt: now, updatedAt: now };
+      if ('id' in bookToAdd) {
+        console.log('[DEBUG] Removing id from book before add:', bookToAdd.id);
+        delete bookToAdd.id;
+      }
+      console.log('[DEBUG] before db.books.add', bookToAdd);
+      await db.books.add(bookToAdd);
+      console.log('[DEBUG] after db.books.add');
+    } catch (err) {
+      console.error('[DEBUG] Dexie add error:', err);
+    }
+    const booksArr = await db.books.toArray();
+    console.log('[DEBUG] after setBooks, books:', booksArr);
+    setBooks(booksArr);
+    window.dispatchEvent(new Event('booksChanged'));
     setAddBookOpen(false);
   };
 
@@ -281,102 +310,98 @@ function App() {
   const [fullscreenAdd, setFullscreenAdd] = useState(false);
   const [fullscreenEdit, setFullscreenEdit] = useState(false);
   return (
-    <ChakraProvider>
-      <Router basename="/velvet-volumes-pwa">
-        {/* Handle URL parameters */}
-        <ShareHandler />
-
-        <Box minH="100vh" bg={appBg} pb="72px">
-          <Flex
-            justify="flex-end"
-            align="center"
-            p={2}
-            bg="white"
-            borderBottom="1px solid #eee"
-          >
-            {!loading && !user && (
+    <>
+      <Box minH="100vh" bg={appBg} pb="72px">
+        <Flex
+          justify="flex-end"
+          align="center"
+          p={2}
+          bg="white"
+          borderBottom="1px solid #eee"
+        >
+          {!loading && !user && (
+            <Button
+              colorScheme="red"
+              size="sm"
+              onClick={() => setAuthModalOpen(true)}
+            >
+              Sign In
+            </Button>
+          )}
+          {!loading && user && (
+            <Flex align="center" gap={2}>
+              <Text fontSize="sm" color="gray.600">
+                {user.email || user.displayName}
+              </Text>
               <Button
-                colorScheme="red"
-                size="sm"
-                onClick={() => setAuthModalOpen(true)}
+                colorScheme="gray"
+                size="xs"
+                variant="outline"
+                onClick={signOut}
               >
-                Sign In
+                Sign Out
               </Button>
-            )}
-            {!loading && user && (
-              <Flex align="center" gap={2}>
-                <Text fontSize="sm" color="gray.600">
-                  {user.email || user.displayName}
-                </Text>
-                <Button
-                  colorScheme="gray"
-                  size="xs"
-                  variant="outline"
-                  onClick={signOut}
-                >
-                  Sign Out
-                </Button>
-              </Flex>
-            )}
-          </Flex>
-          <Routes>
-            <Route
-              path="/"
-              element={
-                <Home
-                  books={books}
-                  onEditBook={(book) => {
-                    if (isMobile) {
-                      setEditBook(book);
-                      setFullscreenEdit(true);
-                    } else {
-                      setEditBook(book);
-                      setEditBookOpen(true);
-                    }
-                  }}
-                  onDeleteBook={handleDeleteBook}
-                />
-              }
-            />
-            <Route path="/search" element={<Search books={books} />} />
-            <Route path="/lists" element={<Lists books={books} />} />
-            <Route path="/analytics" element={<Analytics />} />
-            <Route
-              path="/settings"
-              element={
-                <Settings
-                  onBooksChanged={async () =>
-                    setBooks(await db.books.toArray())
+            </Flex>
+          )}
+        </Flex>
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <Home
+                books={books}
+                onEditBook={(book) => {
+                  if (isMobile) {
+                    setEditBook(book);
+                    setFullscreenEdit(true);
+                  } else {
+                    setEditBook(book);
+                    setEditBookOpen(true);
                   }
-                />
-              }
-            />
-            <Route
-              path="/recommendations"
-              element={
-                <RecommendationsPage books={books} recommended={recommended} />
-              }
-            />
-            <Route
-              path="/add-book"
-              element={
-                <Home
-                  books={books}
-                  onEditBook={(book) => {
-                    if (isMobile) {
-                      setEditBook(book);
-                      setFullscreenEdit(true);
-                    } else {
-                      setEditBook(book);
-                      setEditBookOpen(true);
-                    }
-                  }}
-                  onDeleteBook={handleDeleteBook}
-                  autoOpenAddBook={true}
-                />
-              }
-            />
-          </Routes>
+                }}
+                onDeleteBook={handleDeleteBook}
+              />
+            }
+          />
+          <Route path="/search" element={<Search books={books} />} />
+          <Route path="/lists" element={<Lists books={books} />} />
+          <Route path="/analytics" element={<Analytics />} />
+          <Route
+            path="/settings"
+            element={
+              <Settings
+                onBooksChanged={async () => setBooks(await db.books.toArray())}
+              />
+            }
+          />
+          <Route
+            path="/recommendations"
+            element={
+              <RecommendationsPage books={books} recommended={recommended} />
+            }
+          />
+          <Route
+            path="/add-book"
+            element={
+              <Home
+                books={books}
+                onEditBook={(book) => {
+                  if (isMobile) {
+                    setEditBook(book);
+                    setFullscreenEdit(true);
+                  } else {
+                    setEditBook(book);
+                    setEditBookOpen(true);
+                  }
+                }}
+                onDeleteBook={handleDeleteBook}
+                autoOpenAddBook={true}
+              />
+            }
+          />
+        </Routes>
+        {/* Show Add Book button only on Home tab, using React Router location */}
+        {location.pathname === '/' && (
           <FloatingAddBook
             onClick={() => {
               if (isMobile) {
@@ -386,53 +411,66 @@ function App() {
               }
             }}
           />
-          <BottomNav />
-          {/* Fullscreen add/edit for mobile */}
-          {fullscreenAdd && isMobile && (
-            <EditBookPage
-              onClose={() => setFullscreenAdd(false)}
-              onAdd={handleAddBook}
-              isEdit={false}
-            />
-          )}
-          {fullscreenEdit && isMobile && (
-            <EditBookPage
-              onClose={() => {
-                setFullscreenEdit(false);
-                setEditBook(null);
-              }}
-              onAdd={handleEditBook}
-              initialValues={editBook}
-              isEdit={true}
-            />
-          )}
-          {/* Modals for desktop/tablet */}
-          <ErrorBoundary>
-            <AddBookModal
-              opened={addBookOpen && !isMobile}
-              onClose={() => setAddBookOpen(false)}
-              onAdd={handleAddBook}
-            />
-          </ErrorBoundary>
-          <ErrorBoundary>
-            <AddBookModal
-              opened={editBookOpen && !isMobile}
-              onClose={() => {
-                setEditBookOpen(false);
-                setEditBook(null);
-              }}
-              onAdd={handleEditBook}
-              initialValues={editBook}
-              isEdit
-            />
-          </ErrorBoundary>
-          <AuthModal
-            isOpen={authModalOpen}
-            onClose={() => setAuthModalOpen(false)}
+        )}
+        <BottomNav />
+        {/* Fullscreen add/edit for mobile */}
+        {fullscreenAdd && isMobile && (
+          <EditBookPage
+            onClose={() => setFullscreenAdd(false)}
+            onAdd={handleAddBook}
+            isEdit={false}
           />
-        </Box>
+        )}
+        {fullscreenEdit && isMobile && (
+          <EditBookPage
+            onClose={() => {
+              setFullscreenEdit(false);
+              setEditBook(null);
+            }}
+            onAdd={handleEditBook}
+            initialValues={editBook}
+            isEdit={true}
+          />
+        )}
+        {/* Modals for desktop/tablet */}
+        <ErrorBoundary>
+          <AddBookModal
+            opened={addBookOpen && !isMobile}
+            onClose={() => setAddBookOpen(false)}
+            onAdd={handleAddBook}
+          />
+        </ErrorBoundary>
+        <ErrorBoundary>
+          <AddBookModal
+            opened={editBookOpen && !isMobile}
+            onClose={() => {
+              setEditBookOpen(false);
+              setEditBook(null);
+            }}
+            onAdd={handleEditBook}
+            initialValues={editBook}
+            isEdit
+          />
+        </ErrorBoundary>
+        <AuthModal
+          isOpen={authModalOpen}
+          onClose={() => setAuthModalOpen(false)}
+        />
+      </Box>
+    </>
+  );
+}
+
+function App() {
+  return (
+    <ChakraProvider>
+      <Router basename="/velvet-volumes-pwa">
+        {/* Handle URL parameters */}
+        <ShareHandler />
+        <MainLayout />
       </Router>
     </ChakraProvider>
   );
 }
+
 export default App;

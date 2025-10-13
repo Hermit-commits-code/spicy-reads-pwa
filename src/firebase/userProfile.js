@@ -1,6 +1,6 @@
 // Firestore user profile helpers
 import { doc, setDoc, getDoc } from 'firebase/firestore';
-import db from './db';
+import { db as firestoreDb } from './db';
 
 /**
  * Ensure a user profile exists in Firestore for the given user.
@@ -8,7 +8,7 @@ import db from './db';
  */
 export async function ensureUserProfile(user) {
   if (!user || !user.uid) return;
-  const userRef = doc(db, 'users', user.uid);
+  const userRef = doc(firestoreDb, 'users', user.uid);
   const userSnap = await getDoc(userRef);
   const adminValue = user.email === 'hotcupofjoe2013@gmail.com';
   const premiumValue = true; // All users are premium in paid/early access
@@ -31,7 +31,7 @@ export async function ensureUserProfile(user) {
 
 // Helper to grant/revoke admin or premium status (call from admin UI or script)
 export async function setUserRole(uid, { premium, admin }) {
-  const userRef = doc(db, 'users', uid);
+  const userRef = doc(firestoreDb, 'users', uid);
   const updates = {};
   // All users are premium in paid/early access
   if (premium !== undefined) updates.premium = true;

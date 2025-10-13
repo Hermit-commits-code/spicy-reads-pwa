@@ -89,12 +89,19 @@ export default function AddBookModal(props) {
       createdAt: initialValues?.createdAt || Date.now(),
       updatedAt: Date.now(),
     };
-    if (onAdd) onAdd(book);
+    console.log('[DEBUG] AddBookModal.handleSave called', book);
+    if (onAdd) {
+      console.log('[DEBUG] AddBookModal calling onAdd');
+      onAdd(book);
+    }
     onClose();
   };
 
   const footer = (
     <>
+      <Button onClick={onClose} mr={3} variant="ghost">
+        {t('cancel', 'Cancel')}
+      </Button>
       <Button colorScheme="red" onClick={handleSave}>
         {t('save', 'Save')}
       </Button>
@@ -149,7 +156,7 @@ export default function AddBookModal(props) {
           author={form.author}
           setAuthor={form.setAuthor}
           dictationError={form.dictationError}
-          dictatingField={form.dictatingField}
+          dictatingField={form.dicticatingField}
           setDictationError={form.setDictationError}
           setDictatingField={form.setDictatingField}
           startDictation={startDictation}

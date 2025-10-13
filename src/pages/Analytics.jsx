@@ -1,21 +1,13 @@
-import {
-  Box,
-  Heading,
-  Text,
-  VStack,
-  Stat,
-  StatLabel,
-  StatNumber,
-  StatHelpText,
-  SimpleGrid,
-  Progress,
-} from "@chakra-ui/react";
-import { useEffect, useState } from "react";
-import db from "../db/booksDB";
-import { useTranslation } from "react-i18next";
+import React, { useEffect, useState } from 'react';
+import { Box, VStack } from '@chakra-ui/react';
+import db from '../db/booksDB';
+import { useTranslation } from 'react-i18next';
+import DebugBooksPanel from './analytics/DebugBooksPanel';
+import StatsPanel from './analytics/StatsPanel';
+import GoalPanel from './analytics/GoalPanel';
+import BooksFinishedPanel from './analytics/BooksFinishedPanel';
 
 function getStreak(dates) {
-  // dates: array of ISO strings
   if (!dates.length) return 0;
   const days = dates.map((d) => new Date(d).setHours(0, 0, 0, 0));
   days.sort((a, b) => b - a);
@@ -34,12 +26,67 @@ function getStreak(dates) {
 
 export default function Analytics() {
   const { t } = useTranslation();
-  const bg = "white";
-  const text = "gray.700";
-  const muted = "gray.400";
+  const bg = 'white';
+  const text = 'gray.700';
+  const muted = 'gray.400';
+
   const [books, setBooks] = useState([]);
+  const [goal, setGoal] = useState(() => {
+    const stored = localStorage.getItem('readingGoal');
+    return stored ? parseInt(stored, 10) : 100;
+  });
+  const [editingGoal, setEditingGoal] = useState(false);
+  const [goalInput, setGoalInput] = useState(goal);
+
   useEffect(() => {
-    db.books.toArray().then(setBooks);
+    const loadBooks = () => db.books.toArray().then(setBooks);
+    loadBooks();
+    window.addEventListener('booksChanged', loadBooks);
+    return () => window.removeEventListener('booksChanged', loadBooks);
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('readingGoal', String(goal));
+  }, [goal]);
+
+  // Debug: Log books and their lists property to the console
+  useEffect(() => {
+    if (books && books.length) {
+      console.log('Books in IndexedDB:', books);
+      books.forEach((book) => {
+        console.log(
+          `Book ID: ${book.id}, lists:`,
+          book.lists,
+          typeof book.lists,
+        );
+      });
+    } else {
+      console.log('No books found in IndexedDB.');
+    }
+  }, [books]);
+
+  // One-time Dexie debug: list all DBs and their stores
+  useEffect(() => {
+    (async () => {
+      if (window.Dexie && window.Dexie.getDatabaseNames) {
+        const dbNames = await window.Dexie.getDatabaseNames();
+        console.log('Dexie DB names:', dbNames);
+      }
+      if (db && db.tables) {
+        console.log(
+          'Dexie tables in current db:',
+          db.tables.map((t) => t.name),
+        );
+        for (const table of db.tables) {
+          try {
+            const all = await table.toArray();
+            console.log(`Table ${table.name} contents:`, all);
+          } catch (e) {
+            console.warn(`Could not read table ${table.name}:`, e);
+          }
+        }
+      }
+    })();
   }, []);
 
   const totalBooks = books.length;
@@ -58,81 +105,51 @@ export default function Analytics() {
     : 0;
 
   return (
-    <Box py={8} px={4} maxW="600px" mx="auto" bg={bg} borderRadius="lg">
-      <Heading
-        as="h2"
-        size="lg"
-        mb={6}
-        color="red.600"
-        aria-label={t("analytics", "Analytics & Reading Stats")}
-      >
-        {t("analytics", "Analytics & Reading Stats")}
-      </Heading>
-      <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={6} mb={8}>
-        <Stat>
-          <StatLabel>{t("total_books", "Total Books")}</StatLabel>
-          <StatNumber>{totalBooks}</StatNumber>
-        </Stat>
-        <Stat>
-          <StatLabel>{t("books_finished", "Books Finished")}</StatLabel>
-          <StatNumber>{finishedBooks}</StatNumber>
-          <StatHelpText>
-            {totalBooks > 0
-              ? `${Math.round((finishedBooks / totalBooks) * 100)}% ${t(
-                  "finished",
-                  "finished"
-                )}`
-              : ""}
-          </StatHelpText>
-        </Stat>
-        <Stat>
-          <StatLabel>{t("reading_streak", "Reading Streak")}</StatLabel>
-          <StatNumber>
-            {readingStreak} {t("days", "days")}
-          </StatNumber>
-          <StatHelpText>
-            {t("consecutive_days", "Consecutive days with reading activity")}
-          </StatHelpText>
-        </Stat>
-        <Stat>
-          <StatLabel>{t("avg_spice", "Avg. Spice")}</StatLabel>
-          <StatNumber>{avgSpice}</StatNumber>
-        </Stat>
-        <Stat>
-          <StatLabel>{t("avg_rating", "Avg. Rating")}</StatLabel>
-          <StatNumber>{avgRating}</StatNumber>
-        </Stat>
-      </SimpleGrid>
-      <VStack align="stretch" spacing={4}>
-        <Box>
-          <Text fontWeight="bold" mb={2} color={text}>
-            {t("progress_to_100", "Progress to 100 Books")}
-          </Text>
-          <Progress
-            value={Math.min(100, (totalBooks / 100) * 100)}
-            colorScheme="red"
-            borderRadius="md"
-            aria-label={t("progress_to_100", "Progress to 100 Books")}
+    <>
+      <DebugBooksPanel books={books} />
+      <Box py={8} px={4} maxW="600px" mx="auto" bg={bg} borderRadius="lg">
+        <VStack align="stretch" spacing={4}>
+          <Box>
+            <h2
+              style={{
+                fontWeight: 'bold',
+                fontSize: '1.5rem',
+                color: '#C53030',
+                marginBottom: '1.5rem',
+              }}
+            >
+              {t('analytics', 'Analytics & Reading Stats')}
+            </h2>
+            <StatsPanel
+              t={t}
+              totalBooks={totalBooks}
+              finishedBooks={finishedBooks}
+              readingStreak={readingStreak}
+              avgSpice={avgSpice}
+              avgRating={avgRating}
+            />
+          </Box>
+          <GoalPanel
+            t={t}
+            text={text}
+            muted={muted}
+            totalBooks={totalBooks}
+            goal={goal}
+            editingGoal={editingGoal}
+            goalInput={goalInput}
+            setGoalInput={setGoalInput}
+            setGoal={setGoal}
+            setEditingGoal={setEditingGoal}
           />
-          <Text fontSize="sm" color={muted} mt={1}>
-            {totalBooks}/100 {t("books", "books")}
-          </Text>
-        </Box>
-        <Box>
-          <Text fontWeight="bold" mb={2} color={text}>
-            {t("books_finished_label", "Books Finished")}
-          </Text>
-          <Progress
-            value={totalBooks ? (finishedBooks / totalBooks) * 100 : 0}
-            colorScheme="green"
-            borderRadius="md"
-            aria-label={t("books_finished_label", "Books Finished")}
+          <BooksFinishedPanel
+            t={t}
+            text={text}
+            muted={muted}
+            totalBooks={totalBooks}
+            finishedBooks={finishedBooks}
           />
-          <Text fontSize="sm" color={muted} mt={1}>
-            {finishedBooks} {t("finished", "finished")}
-          </Text>
-        </Box>
-      </VStack>
-    </Box>
+        </VStack>
+      </Box>
+    </>
   );
 }

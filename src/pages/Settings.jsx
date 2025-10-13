@@ -12,11 +12,9 @@ import {
 } from '@chakra-ui/react';
 import { useState, useEffect, useRef } from 'react';
 import Papa from 'papaparse';
-// ...existing code...
 import { useAuth } from '../context/AuthContext';
 import { doc, getDoc } from 'firebase/firestore';
-import db from '../firebase/db';
-// ...existing code...
+import db from '../db/booksDB';
 import { exportUserData, importUserData } from '../firebase/db';
 import BackupRestoreSection from '../components/BackupRestoreSection';
 import AdminPanel from '../components/AdminPanel';
@@ -70,6 +68,34 @@ export default function Settings({ onBooksChanged }) {
   const handleLangChange = (e) => {
     const lng = e.target.value;
     setLang(lng);
+  };
+
+  const handleImport = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+      // Clear and repopulate IndexedDB
+      await db.books.clear();
+      await db.lists.clear();
+      await db.listBooks.clear();
+      if (data.books && data.books.length) await db.books.bulkAdd(data.books);
+      if (data.lists && data.lists.length) await db.lists.bulkAdd(data.lists);
+      if (data.listBooks && data.listBooks.length)
+        await db.listBooks.bulkAdd(data.listBooks);
+      // Debug: log what is in the DB after import
+      const books = await db.books.toArray();
+      const lists = await db.lists.toArray();
+      const listBooks = await db.listBooks.toArray();
+      console.log('DEBUG after import:', { books, lists, listBooks });
+      // Fire event so UI updates
+      window.dispatchEvent(new Event('booksChanged'));
+      if (onBooksChanged) onBooksChanged();
+      alert('Library restored!');
+    } catch (err) {
+      alert('Import failed: ' + err.message);
+    }
   };
 
   return (
@@ -139,6 +165,8 @@ export default function Settings({ onBooksChanged }) {
           isPremiumUser={true}
           toast={toast}
           onBooksChanged={onBooksChanged}
+          db={db}
+          handleImport={handleImport}
         />
         {/* Delete Account Button (all users) */}
         <DeleteAccountButton />
