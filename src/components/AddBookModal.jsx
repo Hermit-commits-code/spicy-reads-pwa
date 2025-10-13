@@ -21,6 +21,7 @@ import ReviewField from './addBook/ReviewField';
 import NotesField from './addBook/NotesField';
 import SeriesFields from './SeriesFields';
 import FormModal from './FormModal';
+import RemindMeAfterAddModal from './addBook/RemindMeAfterAddModal';
 
 import { stopBarcodeScan } from '../utils/barcodeScanner';
 import { startDictation } from '../utils/voiceDictation';
@@ -39,6 +40,8 @@ export default function AddBookModal(props) {
   const { t } = useTranslation();
   const form = useAddBookForm(initialValues || {});
   const [error, setError] = useState(null);
+  const [remindMeModalOpen, setRemindMeModalOpen] = useState(false);
+  const [lastAddedBook, setLastAddedBook] = useState(null);
   const idPrefix = useId();
 
   // Handlers for custom warnings and moods (now use form state)
@@ -95,6 +98,11 @@ export default function AddBookModal(props) {
       console.log('[DEBUG] AddBookModal calling onAdd');
       onAdd(book);
     }
+    // If book has a future release date, show RemindMeAfterAddModal
+    if (book.releaseDate && new Date(book.releaseDate) > new Date()) {
+      setLastAddedBook(book);
+      setRemindMeModalOpen(true);
+    }
     onClose();
   };
 
@@ -137,12 +145,6 @@ export default function AddBookModal(props) {
           setDictationError={form.setDictationError}
           setDictatingField={form.setDictatingField}
           startDictation={startDictation}
-          setBarcodeScanError={form.setBarcodeScanError}
-          setBarcodeModalOpen={form.setBarcodeModalOpen}
-          loadQuagga={form.loadQuagga}
-          videoRef={form.videoRef}
-          scanBarcode={form.scanBarcode}
-          stopBarcodeScan={stopBarcodeScan}
           idPrefix={idPrefix}
         />
         <BarcodeScanModal
@@ -207,7 +209,10 @@ export default function AddBookModal(props) {
         />
         <ContentWarningsField
           t={t}
-          contentWarnings={form.contentWarnings}
+          COMMON_WARNINGS={COMMON_WARNINGS}
+          contentWarnings={
+            Array.isArray(form.contentWarnings) ? form.contentWarnings : []
+          }
           setContentWarnings={form.setContentWarnings}
           customWarning={form.customWarning}
           setCustomWarning={form.setCustomWarning}
@@ -236,7 +241,8 @@ export default function AddBookModal(props) {
         />
         <MoodsField
           t={t}
-          moods={form.moods}
+          COMMON_MOODS={COMMON_MOODS}
+          moods={Array.isArray(form.moods) ? form.moods : []}
           setMoods={form.setMoods}
           customMood={form.customMood}
           setCustomMood={form.setCustomMood}
@@ -274,8 +280,17 @@ export default function AddBookModal(props) {
     );
   }
   return (
-    <FormModal isOpen={opened} onClose={onClose} footer={footer}>
-      {content}
-    </FormModal>
+    <>
+      <FormModal isOpen={opened} onClose={onClose} footer={footer}>
+        {content}
+      </FormModal>
+      {lastAddedBook && (
+        <RemindMeAfterAddModal
+          isOpen={remindMeModalOpen}
+          onClose={() => setRemindMeModalOpen(false)}
+          book={lastAddedBook}
+        />
+      )}
+    </>
   );
 }

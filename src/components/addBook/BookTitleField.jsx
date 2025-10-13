@@ -17,20 +17,16 @@ export default function BookTitleField({
   setDictationError,
   setDictatingField,
   startDictation,
-  setBarcodeScanError,
-  setBarcodeModalOpen,
-  loadQuagga,
-  videoRef,
-  scanBarcode,
-  stopBarcodeScan,
+  idPrefix = '',
 }) {
+  const inputId = `${idPrefix}-book-title-input`;
   return (
     <FormControl isRequired>
-      <FormLabel htmlFor="book-title-input">{t('book_title')}</FormLabel>
+      <FormLabel htmlFor={inputId}>{t('book_title')}</FormLabel>
       <HStack>
         <Input
-          id="book-title-input"
-          name="book-title"
+          id={inputId}
+          name={inputId}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           aria-label={t('book_title')}
@@ -56,47 +52,6 @@ export default function BookTitleField({
           🎤
         </Button>
       </HStack>
-      <Button
-        mt={2}
-        size="sm"
-        onClick={async () => {
-          setBarcodeScanError('');
-          setBarcodeModalOpen(true);
-          await loadQuagga();
-          setTimeout(() => {
-            if (videoRef.current) {
-              scanBarcode(videoRef.current, async (code) => {
-                setBarcodeModalOpen(false);
-                stopBarcodeScan();
-                // Try to fetch book info from Open Library API
-                try {
-                  const resp = await fetch(
-                    `https://openlibrary.org/api/books?bibkeys=ISBN:${code}&format=json&jscmd=data`,
-                  );
-                  const data = await resp.json();
-                  const book = data[`ISBN:${code}`];
-                  if (book) {
-                    setTitle(book.title || '');
-                  } else {
-                    setBarcodeScanError('Book not found for scanned barcode.');
-                  }
-                } catch {
-                  setBarcodeScanError('Failed to fetch book info.');
-                }
-              });
-            }
-          }, 300);
-        }}
-        leftIcon={
-          <span role="img" aria-label="Scan barcode">
-            📷
-          </span>
-        }
-        aria-label={t('scan_barcode_info', 'Scan barcode for book info')}
-        variant="outline"
-      >
-        Scan Barcode
-      </Button>
       {dictationError && <Text color="red.500">{dictationError}</Text>}
     </FormControl>
   );

@@ -17,14 +17,16 @@ export default function BookAuthorField({
   setDictationError,
   setDictatingField,
   startDictation,
+  idPrefix = '',
 }) {
+  const inputId = `${idPrefix}-book-author-input`;
   return (
     <FormControl isRequired>
-      <FormLabel htmlFor="book-author-input">{t('book_author')}</FormLabel>
+      <FormLabel htmlFor={inputId}>{t('book_author')}</FormLabel>
       <HStack>
         <Input
-          id="book-author-input"
-          name="book-author"
+          id={inputId}
+          name={inputId}
           value={author}
           onChange={(e) => setAuthor(e.target.value)}
           aria-label={t('book_author')}

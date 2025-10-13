@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef } from 'react';
 import {
   Box,
   Button,
@@ -19,7 +19,7 @@ import {
   Tab,
   TabPanel,
   useToast,
-} from "@chakra-ui/react";
+} from '@chakra-ui/react';
 import {
   FiCamera,
   FiLink,
@@ -27,14 +27,14 @@ import {
   FiType,
   FiCheck,
   FiX,
-} from "react-icons/fi";
+} from 'react-icons/fi';
 // import removed: extractBookFromUrl
 import {
   fetchBookByISBN,
   searchBooks,
   parseBookText,
-} from "../utils/bookDataFetcher";
-import { scanBarcode } from "../utils/barcodeScanner";
+} from '../utils/bookDataFetcher';
+import { scanBarcode } from '../utils/barcodeScanner';
 
 /**
  * QuickAddBook - Streamlined book adding with multiple input methods
@@ -43,13 +43,13 @@ import { scanBarcode } from "../utils/barcodeScanner";
 export default function QuickAddBook({ onBookAdd }) {
   const [activeTab, setActiveTab] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
   const [foundBooks, setFoundBooks] = useState([]);
   const [selectedBook, setSelectedBook] = useState(null);
 
   // Input states
-  const [searchInput, setSearchInput] = useState("");
-  const [manualInput, setManualInput] = useState("");
+  const [searchInput, setSearchInput] = useState('');
+  const [manualInput, setManualInput] = useState('');
   const [scannerActive, setScannerActive] = useState(false);
 
   const videoRef = useRef(null);
@@ -57,9 +57,9 @@ export default function QuickAddBook({ onBookAdd }) {
 
   // Tab names and icons (removed Paste Link)
   const tabs = [
-    { name: "Scan ISBN", icon: FiCamera, key: "scan" },
-    { name: "Search", icon: FiSearch, key: "search" },
-    { name: "Manual", icon: FiType, key: "manual" },
+    { name: 'Scan ISBN', icon: FiCamera, key: 'scan' },
+    { name: 'Search', icon: FiSearch, key: 'search' },
+    { name: 'Manual', icon: FiType, key: 'manual' },
   ];
 
   // Handle barcode scanning
@@ -67,15 +67,15 @@ export default function QuickAddBook({ onBookAdd }) {
     try {
       setLoading(true);
       setScannerActive(true);
-      setError("");
+      setError('');
 
       await scanBarcode(videoRef.current, async (barcode) => {
         setScannerActive(false);
 
         toast({
-          title: "Barcode detected!",
+          title: 'Barcode detected!',
           description: `ISBN: ${barcode}`,
-          status: "success",
+          status: 'success',
           duration: 2000,
         });
 
@@ -84,11 +84,11 @@ export default function QuickAddBook({ onBookAdd }) {
         if (bookData) {
           setSelectedBook(bookData);
         } else {
-          setError("Book not found in our databases. Try manual entry.");
+          setError('Book not found in our databases. Try manual entry.');
         }
       });
     } catch {
-      setError("Camera access failed. Please check permissions.");
+      setError('Camera access failed. Please check permissions.');
       setScannerActive(false);
     } finally {
       setLoading(false);
@@ -102,39 +102,52 @@ export default function QuickAddBook({ onBookAdd }) {
     if (!searchInput.trim()) return;
 
     setLoading(true);
-    setError("");
+    setError('');
 
     try {
       const results = await searchBooks(searchInput.trim());
       if (results.length > 0) {
         setFoundBooks(results);
       } else {
-        setError("No books found. Try different search terms.");
+        setError('No books found. Try different search terms.');
       }
     } catch {
-      setError("Search failed. Try manual entry.");
+      setError('Search failed. Try manual entry.');
     } finally {
       setLoading(false);
     }
   };
 
   // Handle manual text parsing
-  const handleManualParse = () => {
+  const handleManualParse = async () => {
     if (!manualInput.trim()) return;
 
     const parsed = parseBookText(manualInput.trim());
 
     if (parsed.title || parsed.author) {
       setSelectedBook({
-        title: parsed.title || "",
-        author: parsed.author || "",
-        source: "Manual Entry",
+        title: parsed.title || '',
+        author: parsed.author || '',
+        source: 'Manual Entry',
         needsReview: true,
       });
     } else if (parsed.searchQuery) {
       setSearchInput(parsed.searchQuery);
-      setActiveTab(2); // Switch to search tab
-      handleSearch();
+      setActiveTab(1); // Switch to search tab (index 1)
+      setLoading(true);
+      setError('');
+      try {
+        const results = await searchBooks(parsed.searchQuery);
+        if (results.length > 0) {
+          setFoundBooks(results);
+        } else {
+          setError('No books found. Try different search terms.');
+        }
+      } catch {
+        setError('Search failed. Try manual entry.');
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -184,7 +197,7 @@ export default function QuickAddBook({ onBookAdd }) {
                   px={5}
                   py={2}
                   borderRadius="full"
-                  _selected={{ bg: "red.500", color: "white" }}
+                  _selected={{ bg: 'red.500', color: 'white' }}
                 >
                   <Box as={tab.icon} mr={1} />
                   {tab.name}
@@ -218,9 +231,9 @@ export default function QuickAddBook({ onBookAdd }) {
                       <video
                         ref={videoRef}
                         style={{
-                          width: "100%",
-                          maxWidth: "400px",
-                          borderRadius: "16px",
+                          width: '100%',
+                          maxWidth: '400px',
+                          borderRadius: '16px',
                         }}
                         autoPlay
                         playsInline
@@ -252,7 +265,7 @@ export default function QuickAddBook({ onBookAdd }) {
                     placeholder="Title or Author name"
                     value={searchInput}
                     onChange={(e) => setSearchInput(e.target.value)}
-                    onKeyPress={(e) => e.key === "Enter" && handleSearch()}
+                    onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
                   />
 
                   <Button
@@ -275,7 +288,7 @@ export default function QuickAddBook({ onBookAdd }) {
                           borderRadius="md"
                           w="100%"
                           cursor="pointer"
-                          _hover={{ bg: "gray.50" }}
+                          _hover={{ bg: 'gray.50' }}
                           onClick={() => handleBookSelect(book)}
                         >
                           {book.cover && (
@@ -326,7 +339,7 @@ export default function QuickAddBook({ onBookAdd }) {
                     placeholder="e.g., 'Fourth Wing by Rebecca Yarros' or 'Rebecca Yarros - Fourth Wing'"
                     value={manualInput}
                     onChange={(e) => setManualInput(e.target.value)}
-                    onKeyPress={(e) => e.key === "Enter" && handleManualParse()}
+                    onKeyPress={(e) => e.key === 'Enter' && handleManualParse()}
                   />
 
                   <Button

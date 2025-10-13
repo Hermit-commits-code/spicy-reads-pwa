@@ -18,6 +18,7 @@ import FormatTag from './FormatTag';
 
 import SpiceMeter from './SpiceMeter';
 import StarRating from './StarRating';
+import SetReminderButton from './SetReminderButton';
 
 import { useTranslation } from 'react-i18next';
 import { useState, useEffect } from 'react';
@@ -128,6 +129,10 @@ export default function BookDetailsModal({ book, opened, onClose }) {
               {t('share_error', 'Share failed')}
             </Text>
           )}
+        </Box>
+        {/* Gold-standard: Show SetReminderButton for future releases */}
+        <Box mb={2}>
+          <SetReminderButton book={book} />
         </Box>
         <ModalCloseButton aria-label={t('close', 'Close')} />
         <ModalBody>

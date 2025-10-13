@@ -21,6 +21,8 @@ export function useAddBookForm(initialValues = {}) {
   const [dictatingField, setDictatingField] = useState(null);
   const [barcodeModalOpen, setBarcodeModalOpen] = useState(false);
   const videoRef = useRef(null);
+  // Barcode scan error state
+  const [barcodeScanError, setBarcodeScanError] = useState('');
 
   // Load all lists from the database, and reload when modal is opened (by watching initialValues)
   useEffect(() => {
@@ -85,5 +87,7 @@ export function useAddBookForm(initialValues = {}) {
     barcodeModalOpen,
     setBarcodeModalOpen,
     videoRef,
+    barcodeScanError,
+    setBarcodeScanError,
   };
 }
