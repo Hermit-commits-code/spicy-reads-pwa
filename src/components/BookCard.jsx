@@ -116,7 +116,10 @@ export default function BookCard({
           icon={<EditIcon />}
           aria-label={`Edit ${book.title}`}
           size="lg"
-          onClick={() => onEditBook(book)}
+          onClick={(e) => {
+            e.stopPropagation();
+            onEditBook(book);
+          }}
           colorScheme="yellow"
           variant="ghost"
           isRound
@@ -126,7 +129,10 @@ export default function BookCard({
           icon={<DeleteIcon />}
           aria-label={`Delete ${book.title}`}
           size="lg"
-          onClick={() => onDeleteBook(book.id)}
+          onClick={(e) => {
+            e.stopPropagation();
+            onDeleteBook(book.id);
+          }}
           colorScheme="red"
           variant="ghost"
           isRound

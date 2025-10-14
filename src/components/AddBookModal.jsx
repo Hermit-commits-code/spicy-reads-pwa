@@ -89,7 +89,14 @@ export default function AddBookModal(props) {
       seriesOrder: form.seriesOrder,
       notes: form.notes,
       review: form.review,
-      lists: form.selectedLists,
+      // Always save lists as array of strings (IDs)
+      lists: Array.isArray(form.selectedLists)
+        ? form.selectedLists.map((l) =>
+            typeof l === 'object' && l !== null && l.id
+              ? String(l.id)
+              : String(l),
+          )
+        : [],
       createdAt: initialValues?.createdAt || Date.now(),
       updatedAt: Date.now(),
     };

@@ -120,9 +120,36 @@ export default function AssignListsField({
       {/* Show selected lists as tags below the combo box */}
       {selectedLists.length > 0 && (
         <Wrap mt={2} spacing={2} maxW="100%">
-          {allLists
-            .filter((l) => selectedLists.includes(String(l.id)))
-            .map((list) => (
+          {selectedLists.map((selectedId) => {
+            // Find the list by ID
+            const list = allLists.find(
+              (l) => String(l.id) === String(selectedId),
+            );
+            if (!list) {
+              // If list is not found (e.g., during loading), show the ID temporarily
+              return (
+                <WrapItem key={selectedId}>
+                  <Tag
+                    size="md"
+                    borderRadius="full"
+                    variant="solid"
+                    colorScheme="gray"
+                  >
+                    <TagLabel>Loading...</TagLabel>
+                    <TagCloseButton
+                      onClick={() => {
+                        setSelectedLists(
+                          selectedLists.filter(
+                            (id) => id !== String(selectedId),
+                          ),
+                        );
+                      }}
+                    />
+                  </Tag>
+                </WrapItem>
+              );
+            }
+            return (
               <WrapItem key={list.id}>
                 <Tag
                   size="md"
@@ -140,7 +167,8 @@ export default function AssignListsField({
                   />
                 </Tag>
               </WrapItem>
-            ))}
+            );
+          })}
         </Wrap>
       )}
       <Text fontSize="xs" color="gray.500" mt={1}>

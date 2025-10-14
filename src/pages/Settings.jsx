@@ -21,6 +21,45 @@ import AdminPanel from '../components/AdminPanel';
 import DeleteAccountButton from '../components/DeleteAccountButton';
 
 export default function Settings({ onBooksChanged }) {
+  // Cloud backup: export user data from Firestore
+  const handleExportCloud = async () => {
+    if (!user) return;
+    try {
+      const data = await exportUserData(user.uid);
+      const blob = new Blob([JSON.stringify(data, null, 2)], {
+        type: 'application/json',
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `velvet-volumes-cloud-backup-${new Date()
+        .toISOString()
+        .slice(0, 10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast({ title: 'Cloud backup exported!', status: 'success' });
+    } catch (err) {
+      toast({ title: 'Export failed: ' + err.message, status: 'error' });
+    }
+  };
+
+  // Cloud backup: import user data to Firestore
+  const handleImportCloud = async (e) => {
+    if (!user) return;
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+      await importUserData(user.uid, data);
+      toast({ title: 'Cloud backup imported!', status: 'success' });
+      if (onBooksChanged) onBooksChanged();
+    } catch (err) {
+      toast({ title: 'Import failed: ' + err.message, status: 'error' });
+    }
+  };
   const { user } = useAuth();
   const isPremiumUser = true; // All users are premium in paid/early access
   const [isAdmin, setIsAdmin] = useState(false);
@@ -167,6 +206,8 @@ export default function Settings({ onBooksChanged }) {
           onBooksChanged={onBooksChanged}
           db={db}
           handleImport={handleImport}
+          handleExportJSON={handleExportCloud}
+          handleImportCloud={handleImportCloud}
         />
         {/* Delete Account Button (all users) */}
         <DeleteAccountButton />

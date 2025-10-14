@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Box, VStack } from '@chakra-ui/react';
 import db from '../db/booksDB';
 import { useTranslation } from 'react-i18next';
-import DebugBooksPanel from './analytics/DebugBooksPanel';
 import StatsPanel from './analytics/StatsPanel';
 import GoalPanel from './analytics/GoalPanel';
 import BooksFinishedPanel from './analytics/BooksFinishedPanel';
@@ -49,46 +48,6 @@ export default function Analytics() {
     localStorage.setItem('readingGoal', String(goal));
   }, [goal]);
 
-  // Debug: Log books and their lists property to the console
-  useEffect(() => {
-    if (books && books.length) {
-      console.log('Books in IndexedDB:', books);
-      books.forEach((book) => {
-        console.log(
-          `Book ID: ${book.id}, lists:`,
-          book.lists,
-          typeof book.lists,
-        );
-      });
-    } else {
-      console.log('No books found in IndexedDB.');
-    }
-  }, [books]);
-
-  // One-time Dexie debug: list all DBs and their stores
-  useEffect(() => {
-    (async () => {
-      if (window.Dexie && window.Dexie.getDatabaseNames) {
-        const dbNames = await window.Dexie.getDatabaseNames();
-        console.log('Dexie DB names:', dbNames);
-      }
-      if (db && db.tables) {
-        console.log(
-          'Dexie tables in current db:',
-          db.tables.map((t) => t.name),
-        );
-        for (const table of db.tables) {
-          try {
-            const all = await table.toArray();
-            console.log(`Table ${table.name} contents:`, all);
-          } catch (e) {
-            console.warn(`Could not read table ${table.name}:`, e);
-          }
-        }
-      }
-    })();
-  }, []);
-
   const totalBooks = books.length;
   const finishedBooks = books.filter((b) => b.readingProgress === 100).length;
   const lastReadDates = books.filter((b) => b.lastRead).map((b) => b.lastRead);
@@ -105,51 +64,48 @@ export default function Analytics() {
     : 0;
 
   return (
-    <>
-      <DebugBooksPanel books={books} />
-      <Box py={8} px={4} maxW="600px" mx="auto" bg={bg} borderRadius="lg">
-        <VStack align="stretch" spacing={4}>
-          <Box>
-            <h2
-              style={{
-                fontWeight: 'bold',
-                fontSize: '1.5rem',
-                color: '#C53030',
-                marginBottom: '1.5rem',
-              }}
-            >
-              {t('analytics', 'Analytics & Reading Stats')}
-            </h2>
-            <StatsPanel
-              t={t}
-              totalBooks={totalBooks}
-              finishedBooks={finishedBooks}
-              readingStreak={readingStreak}
-              avgSpice={avgSpice}
-              avgRating={avgRating}
-            />
-          </Box>
-          <GoalPanel
+    <Box py={8} px={4} maxW="600px" mx="auto" bg={bg} borderRadius="lg">
+      <VStack align="stretch" spacing={4}>
+        <Box>
+          <h2
+            style={{
+              fontWeight: 'bold',
+              fontSize: '1.5rem',
+              color: '#C53030',
+              marginBottom: '1.5rem',
+            }}
+          >
+            {t('analytics', 'Analytics & Reading Stats')}
+          </h2>
+          <StatsPanel
             t={t}
-            text={text}
-            muted={muted}
-            totalBooks={totalBooks}
-            goal={goal}
-            editingGoal={editingGoal}
-            goalInput={goalInput}
-            setGoalInput={setGoalInput}
-            setGoal={setGoal}
-            setEditingGoal={setEditingGoal}
-          />
-          <BooksFinishedPanel
-            t={t}
-            text={text}
-            muted={muted}
             totalBooks={totalBooks}
             finishedBooks={finishedBooks}
+            readingStreak={readingStreak}
+            avgSpice={avgSpice}
+            avgRating={avgRating}
           />
-        </VStack>
-      </Box>
-    </>
+        </Box>
+        <GoalPanel
+          t={t}
+          text={text}
+          muted={muted}
+          totalBooks={totalBooks}
+          goal={goal}
+          editingGoal={editingGoal}
+          goalInput={goalInput}
+          setGoalInput={setGoalInput}
+          setGoal={setGoal}
+          setEditingGoal={setEditingGoal}
+        />
+        <BooksFinishedPanel
+          t={t}
+          text={text}
+          muted={muted}
+          totalBooks={totalBooks}
+          finishedBooks={finishedBooks}
+        />
+      </VStack>
+    </Box>
   );
 }

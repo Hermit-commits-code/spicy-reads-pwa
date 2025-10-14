@@ -18,6 +18,7 @@ function BackupRestoreSection({
   isPremiumUser,
   handleExportJSON,
   handleImport,
+  handleImportCloud,
   db,
 }) {
   return (
@@ -62,7 +63,7 @@ function BackupRestoreSection({
                 type="file"
                 accept="application/json"
                 style={{ display: 'none' }}
-                onChange={handleImport}
+                onChange={handleImportCloud}
                 aria-label="Import cloud backup"
               />
             </Button>
