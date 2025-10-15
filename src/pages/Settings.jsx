@@ -10,6 +10,7 @@ import {
 } from '@chakra-ui/react';
 import { useAuth } from '../context/AuthContext';
 import BackupRestoreSection from '../components/BackupRestoreSection';
+import CloudBackupSection from '../components/CloudBackupSection';
 import AdminPanel from '../components/AdminPanel';
 import DeleteAccountButton from '../components/DeleteAccountButton';
 // import GreetingBar from '../components/GreetingBar';
@@ -113,8 +114,17 @@ export default function Settings({ onBooksChanged }) {
             </FormControl>
           </Stack>
         </Box>
-        {/* Backup & Restore Section */}
-        <Box maxW="600px" mx="auto">
+        {/* Gold-standard Cloud Backup Section */}
+        <Box
+          p={6}
+          borderWidth={1}
+          borderRadius="lg"
+          bg="white"
+          boxShadow="sm"
+          maxW="600px"
+          mx="auto"
+          w="100%"
+        >
           <Heading
             as="h2"
             size="lg"
@@ -122,17 +132,12 @@ export default function Settings({ onBooksChanged }) {
             fontWeight="bold"
             letterSpacing="tight"
           >
-            Backup & Restore
+            Cloud Backup & Restore
           </Heading>
-          <BackupRestoreSection
+          <CloudBackupSection
             user={user}
-            isPremiumUser={true}
             toast={toast}
             onBooksChanged={onBooksChanged}
-            db={null}
-            handleImport={handleImport}
-            handleExportJSON={handleExportCloud}
-            handleImportCloud={null}
           />
         </Box>
         {/* Delete Account Button (all users) */}
