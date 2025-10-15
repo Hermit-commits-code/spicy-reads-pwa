@@ -6,6 +6,7 @@ import {
   signInWithGoogle,
   signOutUser,
 } from '../firebase/auth';
+import { clearUserData } from '../utils/clearUserData';
 import { ensureUserProfile } from '../firebase/userProfile';
 import { doc, getDoc } from 'firebase/firestore';
 import { db as firestoreDb } from '../firebase/db';
@@ -19,6 +20,8 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     const unsubscribe = onUserStateChanged(async (firebaseUser) => {
+      // If a new user signs in, always clear all local user data first
+      await clearUserData();
       setUser(firebaseUser);
       setLoading(false);
       if (firebaseUser) {
@@ -43,6 +46,13 @@ export function AuthProvider({ children }) {
     return unsubscribe;
   }, []);
 
+  // Enhanced signOut: clear all user data and reload
+  const enhancedSignOut = async () => {
+    await signOutUser();
+    await clearUserData();
+    window.location.reload();
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -52,7 +62,7 @@ export function AuthProvider({ children }) {
         signIn,
         signUp,
         signInWithGoogle,
-        signOut: signOutUser,
+        signOut: enhancedSignOut,
       }}
     >
       {children}

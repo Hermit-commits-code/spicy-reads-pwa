@@ -13,11 +13,13 @@ export default function GreetingBar({ user, displayName }) {
         maxW="60vw"
         isTruncated
       >
-        {displayName
-          ? `Hey ${displayName}!`
-          : user.displayName
-          ? `Hey ${user.displayName}!`
-          : user.email}
+        {displayName && displayName.trim()
+          ? `Hey ${displayName.trim()}!`
+          : user.displayName && user.displayName.trim()
+          ? `Hey ${user.displayName.trim()}!`
+          : user.email
+          ? `Hey there! (${user.email})`
+          : 'Hey there!'}
       </Text>
       <Icon
         as={FiLogOut}
