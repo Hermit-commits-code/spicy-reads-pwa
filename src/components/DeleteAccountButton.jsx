@@ -13,6 +13,7 @@ import { deleteUser } from 'firebase/auth';
 import { doc, deleteDoc, collection, getDocs } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
 import { db as firestoreDb } from '../firebase/db';
+import { logAccountDeletion } from '../utils/auditLog';
 
 export default function DeleteAccountButton() {
   const { user } = useAuth();
@@ -25,8 +26,8 @@ export default function DeleteAccountButton() {
     if (!user) return;
     setLoading(true);
     try {
-      // Delete all subcollections (books, lists, listBooks)
-      const subcollections = ['books', 'lists', 'listBooks'];
+      // Delete all subcollections (books, lists, listBooks, backups)
+      const subcollections = ['books', 'lists', 'listBooks', 'backups'];
       for (const sub of subcollections) {
         const snap = await getDocs(
           collection(firestoreDb, 'users', user.uid, sub),
@@ -37,6 +38,8 @@ export default function DeleteAccountButton() {
       }
       // Delete user document
       await deleteDoc(doc(firestoreDb, 'users', user.uid));
+      // Log anonymized deletion event for audit/compliance
+      await logAccountDeletion();
       // Delete Firebase Auth user
       await deleteUser(user);
       toast({ title: 'Account deleted', status: 'success' });
@@ -65,12 +68,23 @@ export default function DeleteAccountButton() {
       >
         <AlertDialogOverlay>
           <AlertDialogContent>
-            <AlertDialogHeader fontSize="lg" fontWeight="bold">
-              Delete Account
+            <AlertDialogHeader fontSize="lg" fontWeight="bold" color="red.600">
+              Permanently Delete Account
             </AlertDialogHeader>
             <AlertDialogBody>
-              Are you sure? This will permanently delete your account and all
-              your data. This action cannot be undone.
+              <strong>
+                This action is <u>immediate and irreversible</u>.
+              </strong>
+              <br />
+              <br />
+              All your account data—including books, lists, backups, and
+              login—will be <u>permanently deleted</u> from our servers and
+              cannot be recovered for any reason.
+              <br />
+              <br />
+              By continuing, you acknowledge and accept that this process cannot
+              be undone, and no refunds or account recovery will be possible
+              after deletion.
             </AlertDialogBody>
             <AlertDialogFooter>
               <Button

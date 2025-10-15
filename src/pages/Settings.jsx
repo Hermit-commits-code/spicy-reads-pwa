@@ -7,17 +7,26 @@ import {
   Select,
   useToast,
   Button,
+  Text,
 } from '@chakra-ui/react';
 import { useAuth } from '../context/AuthContext';
+import OnboardingModal from '../components/OnboardingModal';
 import BackupRestoreSection from '../components/BackupRestoreSection';
 import CloudBackupSection from '../components/CloudBackupSection';
 import AdminPanel from '../components/AdminPanel';
 import DeleteAccountButton from '../components/DeleteAccountButton';
 // import GreetingBar from '../components/GreetingBar';
 import { useSettingsLogic } from './SettingsLogic';
+import {
+  requestNotificationPermission,
+  registerServiceWorker,
+} from '../utils/pushNotifications';
+import { useState } from 'react';
 
 export default function Settings({ onBooksChanged }) {
-  const { user } = useAuth();
+  const { user: rawUser } = useAuth();
+  // TEMP: Add a premium flag for demo; replace with real premium check
+  const user = { ...rawUser, premium: rawUser?.premium ?? true };
   const toast = useToast();
   const {
     lang,
@@ -30,6 +39,22 @@ export default function Settings({ onBooksChanged }) {
     handleImport,
     handleExportCloud,
   } = useSettingsLogic({ user, onBooksChanged, toast });
+  const [notifStatus, setNotifStatus] = useState(null);
+  const [onboardingOpen, setOnboardingOpen] = useState(false);
+
+  const handleEnableNotifications = async () => {
+    const reg = await registerServiceWorker();
+    const result = await requestNotificationPermission();
+    setNotifStatus(result.granted ? 'enabled' : `denied (${result.reason})`);
+    toast({
+      title: result.granted ? 'Notifications enabled!' : 'Notifications denied',
+      status: result.granted ? 'success' : 'error',
+    });
+  };
+
+  // Show onboarding tour button if completed
+  const onboardingComplete =
+    localStorage.getItem('onboardingComplete') === 'true';
 
   return (
     <Box
@@ -60,6 +85,18 @@ export default function Settings({ onBooksChanged }) {
         </Box>
       )}
       <Stack spacing={{ base: 10, md: 14 }}>
+        {/* Onboarding Tour Button */}
+        {onboardingComplete && (
+          <Box textAlign="center">
+            <Button
+              colorScheme="purple"
+              variant="outline"
+              onClick={() => setOnboardingOpen(true)}
+            >
+              Show Onboarding Tour
+            </Button>
+          </Box>
+        )}
         {/* Debug: Reset onboarding button */}
         {/* General Section */}
         <Box
@@ -140,11 +177,68 @@ export default function Settings({ onBooksChanged }) {
             onBooksChanged={onBooksChanged}
           />
         </Box>
+        {/* Push Notifications Section (Premium Only) */}
+        <Box
+          p={6}
+          borderWidth={1}
+          borderRadius="lg"
+          bg="white"
+          boxShadow="sm"
+          maxW="600px"
+          mx="auto"
+          w="100%"
+        >
+          <Heading
+            as="h2"
+            size="md"
+            mb={5}
+            color="purple.600"
+            fontWeight="bold"
+            letterSpacing="tight"
+          >
+            Push Notifications
+          </Heading>
+          {user.premium ? (
+            <>
+              <Button
+                colorScheme="purple"
+                onClick={handleEnableNotifications}
+                mb={3}
+              >
+                Enable Push Notifications
+              </Button>
+              {notifStatus && (
+                <Text
+                  fontSize="sm"
+                  color={notifStatus === 'enabled' ? 'green.600' : 'red.600'}
+                >
+                  Status: {notifStatus}
+                </Text>
+              )}
+              <Text fontSize="sm" color="gray.500" mt={2}>
+                Get reminders for reading, backups, and goals. You can manage
+                notification permissions in your browser settings.
+              </Text>
+            </>
+          ) : (
+            <Text fontSize="md" color="gray.500" mt={2}>
+              <b>Premium required:</b> Push notifications are available for
+              premium users only.
+            </Text>
+          )}
+        </Box>
         {/* Delete Account Button (all users) */}
         <DeleteAccountButton />
         {/* Admin Panel (only for admins) */}
         {isAdmin && <AdminPanel />}
       </Stack>
+      <OnboardingModal
+        isOpen={onboardingOpen}
+        onClose={() => setOnboardingOpen(false)}
+        onSetDisplayName={() => {}}
+        initialDisplayName={user.displayName || ''}
+        onComplete={() => setOnboardingOpen(false)}
+      />
     </Box>
   );
 }

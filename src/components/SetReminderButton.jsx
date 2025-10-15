@@ -12,7 +12,14 @@ import {
   Input,
   FormControl,
   FormLabel,
+  VStack,
+  HStack,
+  Divider,
+  useBreakpointValue,
+  Icon,
+  Box,
 } from '@chakra-ui/react';
+import { FaCalendarPlus, FaDownload } from 'react-icons/fa';
 
 // Utility to generate an ICS file string
 function generateICS({ title, description, date, url }) {
@@ -56,6 +63,35 @@ export default function SetReminderButton({ book }) {
     setModalOpen(false);
   };
 
+  // Google Calendar event URL builder
+  const getGoogleCalendarUrl = () => {
+    if (!reminderDate) return '#';
+    const dt = new Date(reminderDate);
+    const pad = (n) => String(n).padStart(2, '0');
+    const y = dt.getUTCFullYear();
+    const m = pad(dt.getUTCMonth() + 1);
+    const d = pad(dt.getUTCDate());
+    const h = pad(dt.getUTCHours());
+    const min = pad(dt.getUTCMinutes());
+    // Google Calendar expects UTC in format: YYYYMMDDTHHMMSSZ
+    const start = `${y}${m}${d}T${h}${min}00Z`;
+    // 1 hour event by default
+    const endDt = new Date(dt.getTime() + 60 * 60 * 1000);
+    const end = `${endDt.getUTCFullYear()}${pad(endDt.getUTCMonth() + 1)}${pad(
+      endDt.getUTCDate(),
+    )}T${pad(endDt.getUTCHours())}${pad(endDt.getUTCMinutes())}00Z`;
+    const text = encodeURIComponent(`Book Release: ${book.title}`);
+    const details = encodeURIComponent(
+      `Don't forget: ${book.title} by ${book.author} releases soon!`,
+    );
+    const location = '';
+    const url = encodeURIComponent(window.location.href);
+    return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${text}&dates=${start}/${end}&details=${details}&location=${location}&sprop=&sprop=name:&add=${url}`;
+  };
+
+  // Responsive: stack vertically on mobile, horizontally on desktop
+  const buttonStack = useBreakpointValue({ base: 'column', md: 'row' });
+
   return (
     <>
       <Button
@@ -64,6 +100,7 @@ export default function SetReminderButton({ book }) {
         mt={2}
         onClick={() => setModalOpen(true)}
         aria-label="Set release reminder"
+        leftIcon={<Icon as={FaCalendarPlus} />}
       >
         Set Reminder
       </Button>
@@ -73,7 +110,7 @@ export default function SetReminderButton({ book }) {
           <ModalHeader>Set Release Reminder</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            <FormControl>
+            <FormControl mb={4}>
               <FormLabel htmlFor="reminder-date">
                 Reminder Date & Time
               </FormLabel>
@@ -86,21 +123,41 @@ export default function SetReminderButton({ book }) {
                 aria-label="Reminder date and time"
               />
             </FormControl>
-            <p style={{ fontSize: '0.9em', color: '#666', marginTop: 8 }}>
-              This will download a calendar event (.ics) you can add to Google,
-              Apple, or Outlook Calendar.
-            </p>
+            <Divider my={2} />
+            <Box mb={2} color="gray.600" fontSize="sm">
+              Add this release to your calendar:
+            </Box>
+            <VStack spacing={3} align="stretch">
+              <Button
+                colorScheme="blue"
+                leftIcon={<Icon as={FaDownload} />}
+                onClick={handleDownloadICS}
+                isDisabled={!reminderDate}
+                variant="outline"
+              >
+                Download .ics (All Calendars)
+              </Button>
+              <a
+                href={getGoogleCalendarUrl()}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ textDecoration: 'none' }}
+              >
+                <Button
+                  colorScheme="green"
+                  leftIcon={<Icon as={FaCalendarPlus} />}
+                  isDisabled={!reminderDate}
+                  variant="solid"
+                  width="100%"
+                >
+                  Add to Google Calendar
+                </Button>
+              </a>
+            </VStack>
           </ModalBody>
           <ModalFooter>
-            <Button onClick={() => setModalOpen(false)} mr={3} variant="ghost">
+            <Button onClick={() => setModalOpen(false)} variant="ghost">
               Cancel
-            </Button>
-            <Button
-              colorScheme="blue"
-              onClick={handleDownloadICS}
-              isDisabled={!reminderDate}
-            >
-              Download Event
             </Button>
           </ModalFooter>
         </ModalContent>

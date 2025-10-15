@@ -59,6 +59,7 @@ export default function OnboardingModal({
   onClose,
   onSetDisplayName,
   initialDisplayName,
+  onComplete,
 }) {
   const [step, setStep] = useState(0);
   const [displayName, setDisplayName] = useState(initialDisplayName || '');
@@ -70,11 +71,15 @@ export default function OnboardingModal({
     if (step < steps.length - 1) {
       setStep(step + 1);
     } else {
+      localStorage.setItem('onboardingComplete', 'true');
+      if (onComplete) onComplete();
       onClose();
     }
   };
 
   const handleSkip = () => {
+    localStorage.setItem('onboardingComplete', 'true');
+    if (onComplete) onComplete();
     onClose();
   };
 

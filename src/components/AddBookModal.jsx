@@ -7,6 +7,7 @@ import QuickAddSection from './addBook/QuickAddSection';
 import BookCoverField from './addBook/BookCoverField';
 import BookTitleField from './addBook/BookTitleField';
 import BookAuthorField from './addBook/BookAuthorField';
+import ReleaseDateField from './addBook/ReleaseDateField';
 import GenreField from './addBook/GenreField';
 import DescriptionField from './addBook/DescriptionField';
 import SpiceMeterField from './addBook/SpiceMeterField';
@@ -99,18 +100,18 @@ export default function AddBookModal(props) {
         : [],
       createdAt: initialValues?.createdAt || Date.now(),
       updatedAt: Date.now(),
+      releaseDate: form.releaseDate,
     };
-    console.log('[DEBUG] AddBookModal.handleSave called', book);
     if (onAdd) {
-      console.log('[DEBUG] AddBookModal calling onAdd');
       onAdd(book);
     }
     // If book has a future release date, show RemindMeAfterAddModal
     if (book.releaseDate && new Date(book.releaseDate) > new Date()) {
       setLastAddedBook(book);
       setRemindMeModalOpen(true);
+    } else {
+      onClose();
     }
-    onClose();
   };
 
   const footer = (
@@ -172,6 +173,12 @@ export default function AddBookModal(props) {
           setDictationError={form.setDictationError}
           setDictatingField={form.setDictatingField}
           startDictation={startDictation}
+          idPrefix={idPrefix}
+        />
+        <ReleaseDateField
+          t={t}
+          releaseDate={form.releaseDate}
+          setReleaseDate={form.setReleaseDate}
           idPrefix={idPrefix}
         />
         <GenreField
@@ -294,7 +301,10 @@ export default function AddBookModal(props) {
       {lastAddedBook && (
         <RemindMeAfterAddModal
           isOpen={remindMeModalOpen}
-          onClose={() => setRemindMeModalOpen(false)}
+          onClose={() => {
+            setRemindMeModalOpen(false);
+            onClose();
+          }}
           book={lastAddedBook}
         />
       )}

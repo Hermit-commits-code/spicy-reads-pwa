@@ -1,10 +1,16 @@
 import React from 'react';
 import { Tag, TagLabel } from '@chakra-ui/react';
 
-const FORMAT_LABELS = {
+export const FORMAT_LABELS = {
   physical: 'Physical',
   digital: 'Digital/eBook',
   audiobook: 'Audiobook',
+};
+
+export const FORMAT_COLORS = {
+  physical: 'red.400', // or any color you prefer
+  digital: 'blue.400',
+  audiobook: 'orange.400',
 };
 
 export default function FormatTag({ format }) {

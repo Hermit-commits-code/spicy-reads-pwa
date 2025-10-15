@@ -7,41 +7,66 @@
 
 const BOOK_URL_PATTERNS = {
   amazon: {
+    // Support /dp/ASIN, /gp/product/ASIN, /gp/aw/d/ASIN, /gp/slredirect/picassoRedirect.html?...ASIN=, etc.
     pattern:
-      /amazon\.(com|co\.uk|ca|de|fr|it|es|co\.jp)\/.*\/dp\/([A-Z0-9]{10})/i,
-    extract: async (url, asin) => {
-      // Extract title and author from URL structure instead of scraping
+      /amazon\.(com|co\.uk|ca|de|fr|it|es|co\.jp)\/(?:.*\/)?(?:dp|gp\/product|gp\/aw\/d)\/([A-Z0-9]{10})|amazon\.(?:com|co\.uk|ca|de|fr|it|es|co\.jp)[^?]*[?&]ASIN=([A-Z0-9]{10})/i,
+    extract: async (url, asin1, asin2) => {
       try {
+        // Try to extract ASIN from any supported pattern
+        let asin = asin1 || asin2;
+        if (!asin) {
+          // Fallback: search for any 10-char ASIN in URL
+          const asinMatch = url.match(/([A-Z0-9]{10})/i);
+          asin = asinMatch ? asinMatch[1] : null;
+        }
+        if (!asin) return null;
+
+        // Try to extract title/author from URL path (best effort)
         const urlPath = new URL(url).pathname;
-        // Pattern: /Title-Author/dp/ASIN or /Title-Author-dp-ASIN
-        const titleAuthorMatch = urlPath.match(/\/([^/]+)\/dp\/[A-Z0-9]+/i);
-
-        let title = "";
-        let author = "";
-
+        let title = '';
+        let author = '';
+        const titleAuthorMatch = urlPath.match(
+          /\/([^/]+)\/(?:dp|gp\/product|gp\/aw\/d)\/[A-Z0-9]+/i,
+        );
         if (titleAuthorMatch) {
           const titleAuthorPart = titleAuthorMatch[1];
-          // Split on last hyphen to separate title from author
-          const parts = titleAuthorPart.split("-");
+          const parts = titleAuthorPart.split('-');
           if (parts.length >= 2) {
-            // Last part is usually author, everything else is title
-            author = parts.pop().replace(/[-_]/g, " ");
-            title = parts.join(" ").replace(/[-_]/g, " ");
+            author = parts.pop().replace(/[-_]/g, ' ');
+            title = parts.join(' ').replace(/[-_]/g, ' ');
           } else {
-            title = titleAuthorPart.replace(/[-_]/g, " ");
+            title = titleAuthorPart.replace(/[-_]/g, ' ');
           }
         }
 
+        // Gold-standard: Try Open Library API for metadata by ASIN
+        let openLibData = null;
+        try {
+          const resp = await fetch(
+            `https://openlibrary.org/api/books?bibkeys=ASIN:${asin}&format=json&jscmd=data`,
+          );
+          const data = await resp.json();
+          const bookData = data[`ASIN:${asin}`];
+          if (bookData) {
+            title = bookData.title || title;
+            author = (bookData.authors && bookData.authors[0]?.name) || author;
+            openLibData = bookData;
+          }
+        } catch (e) {
+          // Ignore Open Library errors, fallback to URL parsing
+        }
+
         return {
-          title: title || "Unknown Title",
-          author: author || "Unknown Author",
+          title: title || 'Unknown Title',
+          author: author || 'Unknown Author',
           asin,
-          source: "Amazon",
-          isbn: asin, // ASIN can be used as ISBN for Amazon lookup
+          source: 'Amazon',
+          isbn: asin,
           url: url,
+          openLibData,
         };
       } catch (error) {
-        console.error("Amazon URL parsing failed:", error);
+        console.error('Amazon URL parsing failed:', error);
         return null;
       }
     },
@@ -55,7 +80,7 @@ const BOOK_URL_PATTERNS = {
         const response = await fetch(url);
         const html = await response.text();
         const parser = new DOMParser();
-        const doc = parser.parseFromString(html, "text/html");
+        const doc = parser.parseFromString(html, 'text/html');
 
         const title = doc
           .querySelector('h1[data-testid="bookTitle"]')
@@ -64,7 +89,7 @@ const BOOK_URL_PATTERNS = {
           .querySelector('[data-testid="name"]')
           ?.textContent?.trim();
         const genre = doc
-          .querySelector(".BookPageMetadataSection__genre")
+          .querySelector('.BookPageMetadataSection__genre')
           ?.textContent?.trim();
 
         return {
@@ -72,10 +97,10 @@ const BOOK_URL_PATTERNS = {
           author,
           genre,
           goodreadsId: bookId,
-          source: "Goodreads",
+          source: 'Goodreads',
         };
       } catch (error) {
-        console.error("Goodreads extraction failed:", error);
+        console.error('Goodreads extraction failed:', error);
         return null;
       }
     },
@@ -94,10 +119,10 @@ const BOOK_URL_PATTERNS = {
           author: data.authors?.[0]?.name,
           isbn: data.isbn_13?.[0] || data.isbn_10?.[0],
           publishYear: data.publish_date,
-          source: "Open Library",
+          source: 'Open Library',
         };
       } catch (error) {
-        console.error("Open Library extraction failed:", error);
+        console.error('Open Library extraction failed:', error);
         return null;
       }
     },
@@ -105,7 +130,7 @@ const BOOK_URL_PATTERNS = {
 };
 
 export async function extractBookFromUrl(url) {
-  if (!url || typeof url !== "string") return null;
+  if (!url || typeof url !== 'string') return null;
 
   for (const [siteName, siteConfig] of Object.entries(BOOK_URL_PATTERNS)) {
     const match = url.match(siteConfig.pattern);
@@ -144,9 +169,9 @@ export function parseBookFromUrlText(url) {
     if (match) {
       const [, part1, part2] = match;
       return {
-        potentialTitle: part1.replace(/[-_]/g, " "),
-        potentialAuthor: part2.replace(/[-_]/g, " "),
-        confidence: "low",
+        potentialTitle: part1.replace(/[-_]/g, ' '),
+        potentialAuthor: part2.replace(/[-_]/g, ' '),
+        confidence: 'low',
       };
     }
   }

@@ -32,5 +32,6 @@ export function useBookFields(initialValues = {}) {
     review: useState(initialValues.review || ''),
     formatsOwned: useState(initialValues.formatsOwned || []),
     lists: useState(initialValues.lists || []),
+    releaseDate: useState(initialValues.releaseDate || ''),
   };
 }

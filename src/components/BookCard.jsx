@@ -1,6 +1,7 @@
 import React from 'react';
 import { Box, Text, Tag, TagLabel, HStack, IconButton } from '@chakra-ui/react';
-import FormatTag from './FormatTag';
+import FormatTag, { FORMAT_COLORS } from './FormatTag';
+import { useBreakpointValue } from '@chakra-ui/react';
 import { EditIcon, DeleteIcon } from '@chakra-ui/icons';
 
 export default function BookCard({
@@ -83,9 +84,25 @@ export default function BookCard({
       </Box>
       {Array.isArray(book.formatsOwned) && book.formatsOwned.length > 0 && (
         <Box mt={2} mb={1} display="flex" justifyContent="center" w="100%">
-          {book.formatsOwned.map((format) => (
-            <FormatTag key={format} format={format} />
-          ))}
+          {useBreakpointValue({ base: true, md: false })
+            ? book.formatsOwned.map((format) => (
+                <Box
+                  key={format}
+                  as="span"
+                  boxSize="12px"
+                  borderRadius="full"
+                  bg={FORMAT_COLORS[format] || 'gray.300'}
+                  mx={0.5}
+                  border="2px solid white"
+                  boxShadow="sm"
+                  title={format.charAt(0).toUpperCase() + format.slice(1)}
+                  aria-label={format}
+                  display="inline-block"
+                />
+              ))
+            : book.formatsOwned.map((format) => (
+                <FormatTag key={format} format={format} />
+              ))}
         </Box>
       )}
       <Text
