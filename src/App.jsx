@@ -12,11 +12,15 @@ import {
   Button,
   IconButton,
   Text,
+  Tooltip,
 } from '@chakra-ui/react';
+import { FiLogOut } from 'react-icons/fi';
 import { AddIcon } from '@chakra-ui/icons';
 import { AiFillHome } from 'react-icons/ai';
 import { MdList, MdSettings, MdBarChart } from 'react-icons/md';
 import { useState, useEffect } from 'react';
+import { useFirestoreDisplayName } from './hooks/useFirestoreDisplayName';
+import OnboardingModal from './components/OnboardingModal';
 import AuthModal from './components/AuthModal';
 import { useAuth } from './context/AuthContext';
 import EditBookPage from './pages/EditBookPage';
@@ -169,6 +173,45 @@ function FloatingAddBook({ onClick }) {
 function MainLayout() {
   const location = useLocation();
   const { user, loading, signOut } = useAuth();
+  const firestoreDisplayName = useFirestoreDisplayName(user);
+  const [onboardingOpen, setOnboardingOpen] = useState(false);
+  const [onboardingDisplayName, setOnboardingDisplayName] = useState('');
+  // Show onboarding if user is logged in and onboardingComplete is not set
+  useEffect(() => {
+    if (user && !localStorage.getItem('onboardingComplete')) {
+      setOnboardingOpen(true);
+      setOnboardingDisplayName(user.displayName || '');
+    }
+  }, [user]);
+
+  // Save display name to Firebase Auth and Firestore, then refresh user
+  const handleSetDisplayName = async (name) => {
+    if (!user || !name) return;
+    try {
+      console.log('[ONBOARDING] Setting display name to:', name);
+      // Update Firebase Auth profile
+      if (user.displayName !== name && user.updateProfile) {
+        await user.updateProfile({ displayName: name });
+        console.log('[ONBOARDING] Updated Auth displayName');
+      }
+      // Update Firestore user profile
+      const { doc, setDoc } = await import('firebase/firestore');
+      const { db: firestoreDb } = await import('./firebase/db');
+      await setDoc(
+        doc(firestoreDb, 'users', user.uid),
+        { displayName: name },
+        { merge: true },
+      );
+      console.log(
+        '[ONBOARDING] Wrote displayName to Firestore for uid',
+        user.uid,
+      );
+      // Force AuthContext to refresh user
+      window.location.reload();
+    } catch (e) {
+      console.error('[ONBOARDING] Error setting display name:', e);
+    }
+  };
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [addBookOpen, setAddBookOpen] = useState(false);
   const [editBookOpen, setEditBookOpen] = useState(false);
@@ -340,17 +383,23 @@ function MainLayout() {
           )}
           {!loading && user && (
             <Flex align="center" gap={2}>
-              <Text fontSize="sm" color="gray.600">
-                {user.email || user.displayName}
+              <Text fontSize="md" color="gray.700" fontWeight="bold" mr={1}>
+                {firestoreDisplayName
+                  ? `Hey ${firestoreDisplayName}!`
+                  : user.displayName
+                  ? `Hey ${user.displayName}!`
+                  : user.email}
               </Text>
-              <Button
-                colorScheme="gray"
-                size="xs"
-                variant="outline"
-                onClick={signOut}
-              >
-                Sign Out
-              </Button>
+              <Tooltip label="Sign Out" hasArrow>
+                <IconButton
+                  icon={<FiLogOut />}
+                  aria-label="Sign Out"
+                  size="sm"
+                  colorScheme="gray"
+                  variant="ghost"
+                  onClick={signOut}
+                />
+              </Tooltip>
             </Flex>
           )}
         </Flex>
@@ -467,6 +516,16 @@ function MainLayout() {
           onClose={() => setAuthModalOpen(false)}
         />
       </Box>
+      {/* Onboarding Modal */}
+      <OnboardingModal
+        isOpen={onboardingOpen}
+        onClose={() => {
+          setOnboardingOpen(false);
+          localStorage.setItem('onboardingComplete', '1');
+        }}
+        onSetDisplayName={handleSetDisplayName}
+        initialDisplayName={onboardingDisplayName}
+      />
     </>
   );
 }
