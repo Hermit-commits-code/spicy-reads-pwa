@@ -1,8 +1,8 @@
-# VelvetVolumes - Book Tracking PWA Roadmap
+# Velvet Volumes - Book Tracking PWA Roadmap
 
 ## 🎯 Vision
 
-A mobile-first book tracking PWA that revolutionizes how readers discover, organize, and share their reading experiences with a focus on **spice levels** and **visual book shelves**. VelvetVolumes is for passionate readers who want more from their library.
+A mobile-first book tracking PWA that revolutionizes how readers discover, organize, and share their reading experiences with a focus on **spice levels** and **visual book shelves**. Velvet Volumes is for passionate readers who want more from their library.
 
 ## 🏆 Competitive Advantages & Unique Features
 

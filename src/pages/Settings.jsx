@@ -9,6 +9,7 @@ import {
   Button,
   Switch,
   useToast,
+  Flex,
 } from '@chakra-ui/react';
 import { useState, useEffect, useRef } from 'react';
 import Papa from 'papaparse';
@@ -144,28 +145,45 @@ export default function Settings({ onBooksChanged }) {
       maxW={{ base: '480px', md: '700px' }}
       mx="auto"
     >
-      <Heading as="h1" size="lg" mb={6}>
+      <Heading
+        as="h1"
+        size="lg"
+        mb={2}
+        fontWeight="extrabold"
+        letterSpacing="tight"
+      >
         Settings
       </Heading>
-      <Stack spacing={{ base: 8, md: 12 }}>
+
+      <Stack spacing={{ base: 10, md: 14 }}>
         {/* General Section */}
         <Box
-          borderWidth="1px"
-          borderRadius="md"
-          p={{ base: 4, md: 8 }}
-          bg="gray.50"
+          p={6}
+          borderWidth={1}
+          borderRadius="lg"
+          bg="white"
+          boxShadow="sm"
+          maxW="600px"
+          mx="auto"
+          w="100%"
         >
-          <Heading as="h2" size="sm" mb={4} color="red.600">
+          <Heading
+            as="h2"
+            size="md"
+            mb={5}
+            color="red.600"
+            fontWeight="bold"
+            letterSpacing="tight"
+          >
             General
           </Heading>
-          <Stack spacing={{ base: 4, md: 6 }}>
+          <Stack spacing={{ base: 5, md: 7 }}>
             <FormControl>
               <FormLabel htmlFor="lang-select">Language</FormLabel>
               <Select
                 id="lang-select"
                 value={lang}
                 onChange={handleLangChange}
-                maxW="240px"
                 aria-label="Language selector"
                 size="md"
               >
@@ -182,7 +200,6 @@ export default function Settings({ onBooksChanged }) {
                 id="default-sort-select"
                 value={sort}
                 onChange={(e) => setSort(e.target.value)}
-                maxW="240px"
                 aria-label="Default sort order"
                 size="md"
               >
@@ -199,16 +216,27 @@ export default function Settings({ onBooksChanged }) {
           </Stack>
         </Box>
         {/* Backup & Restore Section */}
-        <BackupRestoreSection
-          user={user}
-          isPremiumUser={true}
-          toast={toast}
-          onBooksChanged={onBooksChanged}
-          db={db}
-          handleImport={handleImport}
-          handleExportJSON={handleExportCloud}
-          handleImportCloud={handleImportCloud}
-        />
+        <Box maxW="600px" mx="auto">
+          <Heading
+            as="h2"
+            size="lg"
+            mb={6}
+            fontWeight="bold"
+            letterSpacing="tight"
+          >
+            Backup & Restore
+          </Heading>
+          <BackupRestoreSection
+            user={user}
+            isPremiumUser={true}
+            toast={toast}
+            onBooksChanged={onBooksChanged}
+            db={db}
+            handleImport={handleImport}
+            handleExportJSON={handleExportCloud}
+            handleImportCloud={handleImportCloud}
+          />
+        </Box>
         {/* Delete Account Button (all users) */}
         <DeleteAccountButton />
         {/* Admin Panel (only for admins) */}

@@ -38,6 +38,7 @@ import {
   deleteUserBook,
   listenToUserBooks,
 } from './firebase/db';
+import { queueBookUpdate } from './utils/backgroundSync';
 import { useTranslation } from 'react-i18next';
 
 function BottomNav() {
@@ -281,7 +282,12 @@ function MainLayout() {
       updatedAt: now,
     };
     if (user) {
-      await updateUserBook(user.uid, editBook.id, bookToSave);
+      try {
+        await updateUserBook(user.uid, editBook.id, bookToSave);
+      } catch (err) {
+        // If offline or error, queue for background sync
+        queueBookUpdate({ bookId: editBook.id, book: bookToSave });
+      }
     } else {
       await db.books.update(editBook.id, bookToSave);
       setBooks(await db.books.toArray());
