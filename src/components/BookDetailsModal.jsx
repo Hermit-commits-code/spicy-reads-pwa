@@ -48,8 +48,33 @@ export default function BookDetailsModal({ book, opened, onClose }) {
       <Modal isOpen={opened} onClose={onClose} size="lg" isCentered>
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>
+          <ModalHeader
+            display="flex"
+            alignItems="center"
+            justifyContent="space-between"
+          >
             <Heading size="md">{book.title}</Heading>
+            <Button
+              variant="ghost"
+              colorScheme="blue"
+              size="sm"
+              aria-label={t('share', 'Share')}
+              onClick={handleShare}
+              ml={2}
+            >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 20 20"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M15 8.33333C16.3807 8.33333 17.5 7.21405 17.5 5.83333C17.5 4.45262 16.3807 3.33333 15 3.33333C13.6193 3.33333 12.5 4.45262 12.5 5.83333C12.5 6.01014 12.5172 6.18241 12.5492 6.34813L7.45081 9.15187C7.18241 8.98278 6.86813 8.88889 6.53333 8.88889C5.15362 8.88889 4.03433 10.0082 4.03433 11.3889C4.03433 12.7696 5.15362 13.8889 6.53333 13.8889C6.86813 13.8889 7.18241 13.795 7.45081 13.6259L12.5492 16.4297C12.5172 16.5954 12.5 16.7677 12.5 16.9444C12.5 18.3251 13.6193 19.4444 15 19.4444C16.3807 19.4444 17.5 18.3251 17.5 16.9444C17.5 15.5637 16.3807 14.4444 15 14.4444C14.6652 14.4444 14.3509 14.5383 14.0825 14.7074L8.98413 11.9036C9.01613 11.7379 9.03333 11.5656 9.03333 11.3889C9.03333 11.2121 9.01613 11.0398 8.98413 10.8741L14.0825 8.07037C14.3509 8.23946 14.6652 8.33333 15 8.33333Z"
+                  fill="currentColor"
+                />
+              </svg>
+            </Button>
           </ModalHeader>
           <ModalCloseButton />
           <ModalBody>
