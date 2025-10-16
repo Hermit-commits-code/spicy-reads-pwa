@@ -1,246 +1,157 @@
-# Velvet Volumes - Book Tracking PWA Roadmap
+# Velvet Volumes – Gold-Tier Roadmap
+
+# Velvet Volumes – Gold-Tier Roadmap
+
+## 🛡️ Gold-Standard Admin Features
+
+- [ ] User Management Dashboard (AdminUserDashboard.jsx)
+  - View/search/edit/deactivate users
+  - Role management (assign/revoke admin/premium)
+- [ ] Content Moderation (admin/AdminContentModeration.jsx)
+  - Flag/remove/edit posts/books
+- [ ] Analytics Dashboard (admin/AdminAnalyticsDashboard.jsx)
+  - User activity, book trends, feature usage
+- [ ] System Health & Status (admin/AdminSystemHealth.jsx)
+  - Firestore usage, error logs, performance
+- [ ] Admin Controls & Tools (admin/AdminControls.jsx)
+  - Manual backup/restore, feature flags, beta tester management
+- [ ] Audit Log (admin/AdminAuditLog.jsx)
+  - Track admin actions for transparency
+- [ ] Admin Notifications (admin/AdminNotifications.jsx)
+  - System alerts, moderation requests
+- [ ] App-wide Announcements (admin/AdminAnnouncements.jsx)
+  - Send messages to all users
+- [ ] Support Desk (admin/AdminSupportDesk.jsx)
+  - Support ticket/helpdesk integration
 
 ## 🎯 Vision
 
-A mobile-first book tracking PWA that revolutionizes how readers discover, organize, and share their reading experiences with a focus on **spice levels** and **visual book shelves**. Velvet Volumes is for passionate readers who want more from their library.
+A mobile-first book tracking PWA for passionate readers, focused on **spice levels**, **visual book shelves**, and private, meaningful social sharing. Gold-standard UX, privacy, and mobile-first design are core values.
 
-## 🏆 Competitive Advantages & Unique Features
+---
 
-### Core Differentiators
+## 🥇 Core Features (Must-Have)
 
-- [x] **Spice Meter & Content Transparency** - Rate books by "spice level" (heat/steaminess) and add content warnings for full transparency. Filter/search by spice and warnings.
-- [x] **Mobile-First Touch Interactions** - Swipe to shelf books, pinch to zoom shelf view, and thumb-friendly navigation.
-- [x] **Smart Genre Shelving** - Auto-organize books into visual genre shelves.
-- [x] **Mood & Vibe Discovery** - Search and get recommendations by mood ("cozy," "adventurous," "spicy," etc.) combined with spice/genre.
-- [x] **Social, But Not Overwhelming** - Buddy reading (sync progress with a friend), private book clubs, and curated list sharing—no noisy feeds.
-- [ ] **Voice & Camera Input** - Add books by barcode scan, cover photo, or voice commands for fast mobile logging.
-- [x] **Offline-First, Fast PWA** - Lightning-fast, installable, and fully usable offline (cloud sync as a premium feature).
-
-### Advanced Features That Set Us Apart
-
-- [x] **Spice Discovery Engine** - Find books by specific spice levels + genres
-- [x] **Visual Reading Stats** - Beautiful charts showing reading patterns, spice preferences
-- [x] **Quick Spice Warnings** - Content warnings with spice level for sensitive readers
-- [ ] **Barcode/Camera/Voice Book Logging** - Add books via barcode scan, cover photo, or voice commands while multitasking
-
-## 📱 Mobile-First Design Priorities
-
-### Touch-Optimized Interactions
-
-- [x] Thumb-friendly navigation with bottom tabs
-- [x] Large touch targets (44px minimum)
-- [x] Gesture-based actions (swipe, pinch, long-press)
-- [ ] Haptic feedback for important actions
-
-### Performance & Offline
-
-- [x] Aggressive caching for offline shelf browsing
-- [x] Image optimization for book covers
-- [x] Progressive loading of shelf sections
-- [ ] Background sync for reading progress
-
-## 🚀 Roadmap Overview
-
-### 1. Core App Foundation
-
-- [x] App shell and navigation (mobile-first, bottom tabs)
+- [x] App shell, navigation, and responsive layout
+- [x] Onboarding tour (OnboardingModal.jsx)
 - [x] Add/Edit/Delete book functionality
-- [x] Book detail modal/page
-- [x] Basic shelf/list views (by genre)
-- [x] Local storage/database integration (Dexie/IndexedDB)
-- [x] Responsive layout and theming (Chakra UI)
-- [x] PWA configuration (service worker, manifest)
-- [x] Basic onboarding flow
-
-### 2. Core Features
-
-- [x] Spice Meter & Content Transparency (spice level, content warnings)
+- [x] Book detail modal/page (BookDetailsModal.jsx)
+- [x] AddBookModal, reminders, calendar (AddBookModal.jsx, SetReminderButton.jsx)
 - [x] Book cover image handling
 - [x] Genre categorization system
 - [x] Basic search and filtering
-- [x] Touch interactions for shelf browsing (swipe, pinch, drag)
-- [x] Curated book lists creation and sharing
-- [x] Book rating and review system
+- [x] Shelf/list views and curation
+- [x] Local storage/database integration (IndexedDB)
+- [x] PWA configuration (manifest, service worker)
+- [x] Touch-optimized navigation & gestures
+- [x] Performance optimization & aggressive caching
+- [x] Offline-first, fast PWA
+- [x] Basic onboarding flow
 - [x] Reading statistics dashboard
-
-### 3. Premium Features (Paid/Post-Launch)
-
-#### Cloud Sync & Accounts
-
-    - [ ] User account system
-    - [ ] Cloud database integration
-    - [ ] Cross-device synchronization
-    - [ ] Backup and restore functionality
-
-#### Advanced Analytics
-
-    - [ ] Reading habit analysis
-    - [ ] Spice preference tracking
-    - [ ] Personalized recommendations
-    - [ ] Export reading data
+- [x] Book rating and review system
+- [x] Mood & Vibe Discovery
+- [x] Spice Meter & Content Transparency
+- [x] Visual Reading Stats
+- [x] Quick Spice Warnings
+- [x] Social, But Not Overwhelming (private/friend sharing, no public feed)
+- [x] Backup and restore functionality
 
 ---
 
-## 🌟 Nice-to-Have & Differentiators
+## 🏅 Gold-Standard & Polish (Delightful, Differentiators)
 
-- [x] Mood & Vibe Discovery (search/recommend by mood)
-- [x] Social, But Not Overwhelming (buddy reading, private clubs)
-- [ ] Voice & Camera Input (barcode scan, cover photo, voice)
-- [x] Visual Reading Stats (charts, spice preferences)
-- [x] Quick Spice Warnings (content warnings at a glance)
-- [x] Spice Discovery Engine (find by spice+genre)
-- [ ] Author collaboration tools
-- [ ] Book club features
-- [ ] AR book spine scanning
-- [ ] Audiobook spice previews
+### Social & Sharing
 
----
+- [x] Book Details modal & post modal UI/UX (mobile & desktop)
+- [x] "Add to My Lists" logic (from friend post modal)
+- [ ] Undo/feedback for actions (snackbars/toasts)
+- [ ] Accessibility & mobile-friendly modals/flows
+- [ ] Onboarding/docs/in-app help for social features
+- [ ] Firestore usage monitoring/optimization
+- [ ] Finalize and polish all social flows (friend requests, direct shares, notifications, blocking)
+- [ ] Spoiler-free sharing (notes/reviews hidden from friends by default)
+- [ ] Robust error handling and user feedback throughout
 
-## 💎 Premium Features (Post-Launch/Paid)
+### Profile & Account
 
-### Cloud Sync & Accounts
+- [x] User account system (Firebase Auth)
+- [x] User profile page/settings
+- [ ] Username/display name editing (with feedback)
+- [ ] Avatar upload/change
+- [ ] Email/password change & account deletion
+- [ ] Premium/monetization gating (UI + backend)
 
-- [ ] User account system
-- [ ] Cloud database integration
-- [ ] Cross-device synchronization
-- [ ] Backup and restore functionality
+### Lists & Shelves
 
-### Advanced Analytics
+- [x] Curated book lists creation and sharing
+- [x] Add to My Lists from any book/post
+- [ ] List management UI polish (edit, reorder, delete, share)
+- [ ] Drag-and-drop shelf/list reordering
+- [ ] Smart genre/mood auto-tagging
 
+### Notifications & Reminders
+
+- [x] Push notifications (premium)
+- [ ] In-app notification center (friend requests, shares, reminders)
+- [ ] Reminder snooze/undo
+
+### Data & Sync
+
+- [x] Cloud backup/restore (Firestore)
+- [ ] Cross-device sync (full Firestore sync)
+- [ ] Export reading data (CSV/JSON)
+
+### Analytics & Insights
+
+- [x] Visual Reading Stats
 - [ ] Reading habit analysis
-- [ ] Spice preference tracking
 - [ ] Personalized recommendations
-- [ ] Export reading data
+- [ ] Spice preference tracking
 
-#### User Experience
+### PWA & Mobile Polish
 
-- [x] Onboarding flow
-- [ ] Tutorial and help system
-- [x] Performance optimization
-- [x] Accessibility improvements
-
-#### Launch Preparation
-
-- [ ] App store optimization
-- [ ] Marketing materials
-- [ ] Beta testing program
-- [ ] Launch strategy execution
-
-## 🔧 Technical Architecture
-
-### Frontend Stack
-
-- **Framework**: React 18 with Vite
-- **Styling**: TailwindCSS + Custom CSS for 3D effects
-- **State Management**: Context API + useReducer
-- **Routing**: React Router 6
-- **PWA**: Vite PWA plugin
-- **Database**: IndexedDB with Dexie.js
-- **Images**: Sharp for optimization, WebP format
-
-### Key Libraries & Tools
-
-- [ ] `dexie` - IndexedDB wrapper for local data
-- [ ] `framer-motion` - Smooth animations and gestures
-- [ ] `react-virtual` - Efficient shelf scrolling
-- [ ] `workbox` - Advanced service worker features
-- [ ] `sharp` - Image processing
-- [ ] `react-hook-form` - Form handling
-- [ ] `react-query` - Data fetching and caching
-
-## 💡 Innovation Opportunities
-
-### Unique Selling Points
-
-1. **First book app with spice rating & content transparency** - Untapped market for romance/adult fiction readers who want to filter by spice and warnings
-2. **Visual shelf metaphor** - Makes digital feel physical and organized
-3. **Mobile-gesture native** - Built for thumb navigation from day one
-4. **Mood & vibe-based discovery** - "I want something cozy and spicy" search
-5. **Social, but not overwhelming** - Buddy reading, private clubs, and curated lists without noisy feeds
-6. **Voice & camera book logging** - Add books by barcode, cover photo, or voice
-7. **Offline-first, fast PWA** - Fully usable offline, with cloud sync as a premium
-
-### Future Expansion Ideas
-
-- [ ] **Author collaboration tools** - Let authors promote their spicy content
-- [ ] **Book club features** - Group reading with spice level consensus
-- [ ] **AR book spine scanning** - Point camera at bookshelf to add books
-- [ ] **Audiobook spice previews** - Sample the steamiest parts safely
-
-## 📊 Success Metrics
-
-### User Engagement
-
-- Daily active users opening shelf view
-- Books added with spice ratings per user
-- Time spent browsing shelves
-- Social sharing of spicy book lists
-
-### Product-Market Fit
-
-- Spice rating feature usage rate
-- User retention after first week
-- App store ratings mentioning unique features
-- Organic social media mentions
-
-### Revenue (Premium)
-
-- Cloud sync subscription rate
-- Advanced analytics feature adoption
-- Premium shelf themes usage
-
-## 🎨 Design System
-
-### Color Palette
-
-- **Primary Spice**: Red gradient (#ef4444 to #dc2626)
-- **Shelf Wood**: Brown gradient (#92400e to #78350f)
-- **Book Spines**: Vibrant genre-based colors
-- **Background**: Soft cream (#fef7ed) / Dark mode (#1f2937)
-
-### Typography
-
-- **Headings**: Inter Bold
-- **Body**: System font stack for performance
-- **Book Titles**: Serif for elegance (Crimson Text)
-
-### Iconography
-
-- **Spice Meter**: Chili pepper icons (🌶️)
-- **Genres**: Custom illustrated icons
-- **Actions**: Rounded, friendly icons
+- [ ] PWA install/splash branding polish
+- [ ] App store optimization (icons, screenshots, metadata)
+- [ ] Beta testing program & feedback loop
 
 ---
 
-## 📅 Weekly Milestones
+## 💎 Nice-to-Have / Future
 
-### Week 1
+- [ ] Voice & Camera Input (barcode scan, cover photo, voice)
+- [ ] Advanced recommendations (AI/ML)
+- [ ] Advanced analytics dashboard
+- [ ] Social badges/achievements
+- [ ] Book club/group features
+- [ ] Advanced theme customization
+- [ ] Marketing materials & launch strategy
+- [ ] Performance monitoring setup
 
-- [x] Complete foundation setup
-- [x] Basic routing and navigation
-- [x] IndexedDB integration
-- [x] First book add/edit functionality
+---
 
-### Week 2
+## 🗂️ Backlog / Technical
 
-- [x] Shelf visualization MVP
-- [x] Spice rating system
-- [x] Basic responsive design
-- [x] PWA installation prompt
+- [ ] Full background sync
+- [ ] Workbox for advanced service worker
+- [ ] Framer-motion for smooth animations
+- [ ] React-virtual for efficient shelf scrolling
+- [ ] Sharp for image processing
+- [ ] React-hook-form for forms
+- [ ] React-query for data fetching/caching
 
-### Week 3
+---
 
-- [x] Advanced search with spice filters
-- [x] Genre shelf organization
-- [x] Touch gesture implementation
-- [x] Reading statistics
+## 📅 Milestones & Weekly Flow
 
-### Week 4
+### Week 1-2
 
-- [x] List curation features
-- [x] Social sharing basics
-- [x] Performance optimization
-- [x] User testing round 1
+- [x] Foundation setup, routing, IndexedDB, add/edit book
+- [x] Shelf visualization MVP, spice rating, responsive design, PWA prompt
+
+### Week 3-4
+
+- [x] Advanced search, genre shelf, gestures, reading stats
+- [x] List curation, social basics, performance, user testing
 
 ### Week 5-6
 
@@ -258,7 +169,7 @@ A mobile-first book tracking PWA that revolutionizes how readers discover, organ
 
 ---
 
-_Last Updated: September 25, 2025_
+_Last Updated: October 16, 2025_
 _Next Review: Weekly team sync_
 
-> **Note**: This roadmap is a living document. We'll update it weekly based on user feedback, technical discoveries, and market opportunities. The spice rating system is our killer feature - let's make it amazing! 🌶️📚
+> **Note**: This roadmap is a living document. Update weekly based on user feedback, technical discoveries, and market opportunities. The spice rating system is our killer feature – let's make it amazing! 🌶️📚

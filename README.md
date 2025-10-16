@@ -34,6 +34,7 @@
 - ✅ **Reading Stats**: Visualize your reading patterns and preferences
 - ✅ **Lists & Custom Shelves**: Organize books into custom lists
 - ✅ **Cloud Backup & Restore**: Sync your library across devices
+- ✅ **Social Feed**: Share books to a public feed and discover what others are reading
 - ✅ **Barcode & Camera Book Logging**: Add books via barcode scan (camera-powered). _Voice input not included._
 - ✅ **Multi-language**: English, Español (more coming)
 - ⬜ **Haptic Feedback**: For important actions (not yet implemented)
@@ -74,6 +75,7 @@
 
 - Open the app in your browser or install it as a PWA on your device.
 - Add, edit, and organize books with spice ratings, moods, and lists.
+- Share books to the public Social Feed and see what others are reading (Social tab).
 - Use the **Backup & Restore** section in Settings to export/import your data locally or via the cloud.
 - Sign in to enable cloud sync and backup features.
 

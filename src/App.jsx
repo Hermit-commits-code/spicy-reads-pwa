@@ -1,3 +1,27 @@
+function AdminLayout() {
+  const location = useLocation();
+  const { user } = useAuth();
+  const isAdmin = user && user.admin;
+  return (
+    <Box minH="100vh" bg="gray.50" pb="60px" display="flex">
+      <AdminSidebar />
+      <Box flex="1">
+        <Routes>
+          <Route path="/admin/users" element={isAdmin ? <AdminUserDashboard /> : <Text p={8} color="red.500">Access denied: Admins only.</Text>} />
+          <Route path="/admin/moderation" element={isAdmin ? <AdminContentModeration /> : <Text p={8} color="red.500">Access denied: Admins only.</Text>} />
+          <Route path="/admin/analytics" element={isAdmin ? <AdminAnalyticsDashboard /> : <Text p={8} color="red.500">Access denied: Admins only.</Text>} />
+          <Route path="/admin/system" element={isAdmin ? <AdminSystemHealth /> : <Text p={8} color="red.500">Access denied: Admins only.</Text>} />
+          <Route path="/admin/controls" element={isAdmin ? <AdminControls /> : <Text p={8} color="red.500">Access denied: Admins only.</Text>} />
+          <Route path="/admin/audit" element={isAdmin ? <AdminAuditLog /> : <Text p={8} color="red.500">Access denied: Admins only.</Text>} />
+          <Route path="/admin/notifications" element={isAdmin ? <AdminNotifications /> : <Text p={8} color="red.500">Access denied: Admins only.</Text>} />
+          <Route path="/admin/announcements" element={isAdmin ? <AdminAnnouncements /> : <Text p={8} color="red.500">Access denied: Admins only.</Text>} />
+          <Route path="/admin/support" element={isAdmin ? <AdminSupportDesk /> : <Text p={8} color="red.500">Access denied: Admins only.</Text>} />
+        </Routes>
+        <BottomNav />
+      </Box>
+    </Box>
+  );
+}
 import {
   BrowserRouter as Router,
   Routes,
@@ -5,6 +29,15 @@ import {
   NavLink,
   useLocation,
 } from 'react-router-dom';
+import AdminSidebar from './components/admin/AdminSidebar';
+import AdminContentModeration from './components/admin/AdminContentModeration';
+import AdminAnalyticsDashboard from './components/admin/AdminAnalyticsDashboard';
+import AdminSystemHealth from './components/admin/AdminSystemHealth';
+import AdminControls from './components/admin/AdminControls';
+import AdminAuditLog from './components/admin/AdminAuditLog';
+import AdminNotifications from './components/admin/AdminNotifications';
+import AdminAnnouncements from './components/admin/AdminAnnouncements';
+import AdminSupportDesk from './components/admin/AdminSupportDesk';
 import {
   ChakraProvider,
   Box,
@@ -17,18 +50,20 @@ import {
 import { FiLogOut } from 'react-icons/fi';
 import { AddIcon } from '@chakra-ui/icons';
 import { AiFillHome } from 'react-icons/ai';
-import { MdList, MdSettings, MdBarChart } from 'react-icons/md';
+import { MdList, MdSettings, MdBarChart, MdPeople } from 'react-icons/md';
 import { useState, useEffect } from 'react';
 import { useFirestoreDisplayName } from './hooks/useFirestoreDisplayName';
 import OnboardingModal from './components/OnboardingModal';
 import AuthModal from './components/AuthModal';
 import { useAuth } from './context/AuthContext';
 import EditBookPage from './pages/EditBookPage';
+import AdminUserDashboard from './components/AdminUserDashboard';
 import Home from './pages/Home';
 import Lists from './pages/Lists';
 import Settings from './pages/Settings';
 import Search from './pages/Search';
 import Analytics from './pages/Analytics';
+import Social from './pages/Social';
 import AddBookModal from './components/AddBookModal';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import ShareHandler from './components/ShareHandler';
@@ -51,6 +86,69 @@ function BottomNav() {
   const navBorder = '#eee';
   const iconColor = 'gray.700';
   const activeColor = 'red.500';
+  const { user } = useAuth();
+
+  // Gold-standard tab config
+  const navTabs = [
+    {
+      route: '/',
+      label: t('home'),
+      icon: <AiFillHome size={24} style={{ marginBottom: 2 }} />,
+      show: true,
+      aria: t('home'),
+    },
+    {
+      route: '/search',
+      label: t('search'),
+      icon: <MdList size={24} style={{ marginBottom: 2 }} />,
+      show: true,
+      aria: t('search'),
+    },
+    {
+      route: '/lists',
+      label: t('lists'),
+      icon: <MdList size={24} style={{ marginBottom: 2 }} />,
+      show: !!user,
+      aria: t('lists'),
+    },
+    {
+      route: '/analytics',
+      label: t('stats'),
+      icon: <MdBarChart size={24} style={{ marginBottom: 2 }} />,
+      show: !!user,
+      aria: t('stats'),
+    },
+    {
+      route: '/social',
+      label: t('social', 'Social'),
+      icon: <MdPeople size={24} style={{ marginBottom: 2 }} />,
+      show: !!user,
+      aria: t('social_feed', 'Social'),
+    },
+    {
+      route: '/settings',
+      label: t('settings'),
+      icon: <MdSettings size={24} style={{ marginBottom: 2 }} />,
+      show: true,
+      aria: t('settings'),
+    },
+  ];
+
+  // Always append Admin tab for admins (gold standard)
+  if (user && user.admin) {
+    navTabs.push({
+      route: '/admin/users',
+      label: 'Admin',
+      icon: (
+        <MdSettings size={24} style={{ marginBottom: 2, color: '#d53f8c' }} />
+      ),
+      show: true,
+      aria: 'Admin',
+    });
+  }
+
+  const { signOut } = useAuth();
+
   return (
     <Flex
       as="nav"
@@ -68,86 +166,44 @@ function BottomNav() {
       role="navigation"
       aria-label={t('main_navigation', 'Main navigation')}
     >
-      <NavLink to="/" style={{ textDecoration: 'none' }}>
-        {({ isActive }) => (
-          <Button
-            variant="ghost"
-            flexDir="column"
-            alignItems="center"
-            size="sm"
-            aria-label={t('home')}
-            color={isActive ? activeColor : iconColor}
-            _hover={{ color: activeColor }}
+      {navTabs
+        .filter((tab) => tab.show)
+        .map((tab) => (
+          <NavLink
+            key={tab.route}
+            to={tab.route}
+            style={{ textDecoration: 'none' }}
           >
-            <AiFillHome size={24} style={{ marginBottom: 2 }} />
-            <Text fontSize="xs">{t('home')}</Text>
-          </Button>
-        )}
-      </NavLink>
-      <NavLink to="/search" style={{ textDecoration: 'none' }}>
-        {({ isActive }) => (
-          <Button
+            {({ isActive }) => (
+              <Button
+                variant="ghost"
+                flexDir="column"
+                alignItems="center"
+                size="sm"
+                aria-label={tab.aria}
+                color={isActive ? activeColor : iconColor}
+                _hover={{ color: activeColor }}
+              >
+                {tab.icon}
+                <Text fontSize="xs">{tab.label}</Text>
+              </Button>
+            )}
+          </NavLink>
+        ))}
+      {/* Gold-standard sign out button for logged-in users */}
+      {user && (
+        <Tooltip label={t('sign_out', 'Sign Out')}>
+          <IconButton
+            icon={<FiLogOut size={22} />}
+            aria-label={t('sign_out', 'Sign Out')}
             variant="ghost"
-            flexDir="column"
-            alignItems="center"
-            size="sm"
-            aria-label={t('search')}
-            color={isActive ? activeColor : iconColor}
+            color={iconColor}
             _hover={{ color: activeColor }}
-          >
-            <MdList size={24} style={{ marginBottom: 2 }} />
-            <Text fontSize="xs">{t('search')}</Text>
-          </Button>
-        )}
-      </NavLink>
-      <NavLink to="/lists" style={{ textDecoration: 'none' }}>
-        {({ isActive }) => (
-          <Button
-            variant="ghost"
-            flexDir="column"
-            alignItems="center"
+            onClick={signOut}
             size="sm"
-            aria-label={t('lists')}
-            color={isActive ? activeColor : iconColor}
-            _hover={{ color: activeColor }}
-          >
-            <MdList size={24} style={{ marginBottom: 2 }} />
-            <Text fontSize="xs">{t('lists')}</Text>
-          </Button>
-        )}
-      </NavLink>
-      <NavLink to="/analytics" style={{ textDecoration: 'none' }}>
-        {({ isActive }) => (
-          <Button
-            variant="ghost"
-            flexDir="column"
-            alignItems="center"
-            size="sm"
-            aria-label={t('stats')}
-            color={isActive ? activeColor : iconColor}
-            _hover={{ color: activeColor }}
-          >
-            <MdBarChart size={24} style={{ marginBottom: 2 }} />
-            <Text fontSize="xs">{t('stats')}</Text>
-          </Button>
-        )}
-      </NavLink>
-      <NavLink to="/settings" style={{ textDecoration: 'none' }}>
-        {({ isActive }) => (
-          <Button
-            variant="ghost"
-            flexDir="column"
-            alignItems="center"
-            size="sm"
-            aria-label={t('settings')}
-            color={isActive ? activeColor : iconColor}
-            _hover={{ color: activeColor }}
-          >
-            <MdSettings size={24} style={{ marginBottom: 2 }} />
-            <Text fontSize="xs">{t('settings')}</Text>
-          </Button>
-        )}
-      </NavLink>
+          />
+        </Tooltip>
+      )}
     </Flex>
   );
 }
@@ -176,42 +232,13 @@ function MainLayout() {
   const firestoreDisplayName = useFirestoreDisplayName(user);
   const [onboardingOpen, setOnboardingOpen] = useState(false);
   const [onboardingDisplayName, setOnboardingDisplayName] = useState('');
-  // Show onboarding if user is logged in and onboardingComplete is not set
   useEffect(() => {
     if (user && !localStorage.getItem('onboardingComplete')) {
       setOnboardingOpen(true);
       setOnboardingDisplayName(user.displayName || '');
     }
   }, [user]);
-
-  // Save display name to Firebase Auth and Firestore, then refresh user
-  const handleSetDisplayName = async (name) => {
-    if (!user || !name) return;
-    try {
-      console.log('[ONBOARDING] Setting display name to:', name);
-      // Update Firebase Auth profile
-      if (user.displayName !== name && user.updateProfile) {
-        await user.updateProfile({ displayName: name });
-        console.log('[ONBOARDING] Updated Auth displayName');
-      }
-      // Update Firestore user profile
-      const { doc, setDoc } = await import('firebase/firestore');
-      const { db: firestoreDb } = await import('./firebase/db');
-      await setDoc(
-        doc(firestoreDb, 'users', user.uid),
-        { displayName: name },
-        { merge: true },
-      );
-      console.log(
-        '[ONBOARDING] Wrote displayName to Firestore for uid',
-        user.uid,
-      );
-      // Force AuthContext to refresh user
-      window.location.reload();
-    } catch (e) {
-      console.error('[ONBOARDING] Error setting display name:', e);
-    }
-  };
+  // ...existing book logic...
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [addBookOpen, setAddBookOpen] = useState(false);
   const [editBookOpen, setEditBookOpen] = useState(false);
@@ -228,6 +255,7 @@ function MainLayout() {
   const recommended = getRecommendedBooks(books, { max: 20 });
 
   // Sync books from Firestore if logged in, else use local DB
+
   useEffect(() => {
     let unsubscribe;
     if (user) {
@@ -253,6 +281,33 @@ function MainLayout() {
       if (unsubscribe) unsubscribe();
     };
   }, [user]);
+
+  return (
+    <>
+      <Box minH="100vh" bg={appBg} pb="72px">
+        {/* ...existing main routes and modals... */}
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/search" element={<Search />} />
+          <Route path="/lists" element={<Lists />} />
+          <Route path="/analytics" element={<Analytics />} />
+          <Route path="/social" element={<Social />} />
+          <Route path="/settings" element={<Settings />} />
+        </Routes>
+        <BottomNav />
+        {/* ...modals and onboarding... */}
+        <OnboardingModal
+          isOpen={onboardingOpen}
+          onClose={() => {
+            setOnboardingOpen(false);
+            localStorage.setItem('onboardingComplete', '1');
+          }}
+          onSetDisplayName={() => {}}
+          initialDisplayName={onboardingDisplayName}
+        />
+      </Box>
+    </>
+  );
 
   // Listen for auto-open add book event
   useEffect(() => {
@@ -458,6 +513,7 @@ function MainLayout() {
               />
             }
           />
+          <Route path="/social" element={<Social />} />
         </Routes>
         {/* Show Add Book button only on Home tab, using React Router location */}
         {location.pathname === '/' && (
@@ -534,9 +590,13 @@ function App() {
   return (
     <ChakraProvider>
       <Router basename="/velvet-volumes-pwa">
-        {/* Handle URL parameters */}
         <ShareHandler />
-        <MainLayout />
+        <Routes>
+          {/* Admin routes use AdminLayout */}
+          <Route path="/admin/*" element={<AdminLayout />} />
+          {/* All other routes use MainLayout */}
+          <Route path="/*" element={<MainLayout />} />
+        </Routes>
       </Router>
     </ChakraProvider>
   );

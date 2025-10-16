@@ -48,6 +48,7 @@ const steps = [
         <Text>• Add books with barcode, camera, or smart paste</Text>
         <Text>• Cloud backup & restore for peace of mind</Text>
         <Text>• Organize with lists, tags, and spice meter</Text>
+        <Text>• Share books to the public Social Feed</Text>
         <Text>• All features work offline!</Text>
       </Stack>
     ),

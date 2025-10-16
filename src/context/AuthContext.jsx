@@ -18,21 +18,23 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [isPremium, setIsPremium] = useState(true); // default true for early access
 
+
   useEffect(() => {
     const unsubscribe = onUserStateChanged(async (firebaseUser) => {
       // If a new user signs in, always clear all local user data first
       await clearUserData();
-      setUser(firebaseUser);
+      let mergedUser = firebaseUser;
       setLoading(false);
       if (firebaseUser) {
         await ensureUserProfile(firebaseUser);
-        // Fetch premium flag from Firestore
+        // Fetch user profile from Firestore and merge admin/premium flags
         try {
           const userRef = doc(firestoreDb, 'users', firebaseUser.uid);
           const userSnap = await getDoc(userRef);
           if (userSnap.exists()) {
             const data = userSnap.data();
             setIsPremium(!!data.premium);
+            mergedUser = { ...firebaseUser, ...data };
           } else {
             setIsPremium(true); // fallback
           }
@@ -42,6 +44,7 @@ export function AuthProvider({ children }) {
       } else {
         setIsPremium(true); // fallback for logged out
       }
+      setUser(mergedUser);
     });
     return unsubscribe;
   }, []);

@@ -8,18 +8,6 @@ import theme from './theme';
 import { AuthProvider } from './context/AuthContext';
 
 // Register service worker for background sync
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker
-      .register('/sw.js')
-      .then((reg) => {
-        console.log('Service worker registered:', reg);
-      })
-      .catch((err) => {
-        console.error('Service worker registration failed:', err);
-      });
-  });
-}
 
 // Utility: queue book update for background sync
 export async function queueBookUpdate(update) {

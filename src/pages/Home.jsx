@@ -21,7 +21,7 @@ const COMMON_MOODS = [
 ];
 
 export default function Home({
-  books,
+  books = [],
   onEditBook,
   onDeleteBook,
   autoOpenAddBook,

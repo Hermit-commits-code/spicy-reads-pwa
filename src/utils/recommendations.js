@@ -7,6 +7,7 @@
 function getRecommendedBooks(books, options = {}) {
   // books: array of all book objects in the library
   // options: { max = 10, excludeIds = [], userLists = [], recentOnly = false }
+  books = books || [];
   const {
     max = 10,
     excludeIds = [],

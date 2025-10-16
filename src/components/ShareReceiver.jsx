@@ -9,11 +9,15 @@ export default function ShareReceiver({ onBookAdd }) {
   const { sharedData, clearSharedData } = useShareHandler();
   const [isDuplicate, setIsDuplicate] = React.useState(false);
   const [checking, setChecking] = React.useState(false);
+  const [importStatus, setImportStatus] = React.useState(null); // 'success' | 'error' | null
+  const [importError, setImportError] = React.useState('');
 
   React.useEffect(() => {
     async function checkDuplicate() {
       setChecking(true);
       setIsDuplicate(false);
+      setImportStatus(null);
+      setImportError('');
       if (sharedData && sharedData.extractedBook) {
         const { title, author } = sharedData.extractedBook;
         if (title && author) {
@@ -54,7 +58,49 @@ export default function ShareReceiver({ onBookAdd }) {
         }}
       >
         <h2>Add Shared Book</h2>
-        {checking ? (
+        {importStatus === 'success' ? (
+          <div style={{ textAlign: 'center', margin: '24px 0' }}>
+            <p
+              style={{ color: '#16a34a', fontWeight: 'bold', fontSize: '18px' }}
+            >
+              🎉 Book imported successfully!
+            </p>
+            <button
+              onClick={clearSharedData}
+              style={{
+                backgroundColor: '#666',
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                padding: '12px 24px',
+                marginTop: '16px',
+              }}
+            >
+              Close
+            </button>
+          </div>
+        ) : importStatus === 'error' ? (
+          <div style={{ textAlign: 'center', margin: '24px 0' }}>
+            <p
+              style={{ color: '#e53e3e', fontWeight: 'bold', fontSize: '18px' }}
+            >
+              ❌ {importError || 'There was an error importing the book.'}
+            </p>
+            <button
+              onClick={clearSharedData}
+              style={{
+                backgroundColor: '#666',
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                padding: '12px 24px',
+                marginTop: '16px',
+              }}
+            >
+              Close
+            </button>
+          </div>
+        ) : checking ? (
           <p>Checking for duplicates...</p>
         ) : sharedData.extractedBook ? (
           <div>
@@ -79,9 +125,14 @@ export default function ShareReceiver({ onBookAdd }) {
               </p>
             ) : (
               <button
-                onClick={() => {
-                  onBookAdd(sharedData.extractedBook);
-                  clearSharedData();
+                onClick={async () => {
+                  try {
+                    await onBookAdd(sharedData.extractedBook);
+                    setImportStatus('success');
+                  } catch (err) {
+                    setImportStatus('error');
+                    setImportError(err?.message || 'Unknown error');
+                  }
                 }}
                 style={{
                   backgroundColor: '#ef4444',
@@ -118,18 +169,21 @@ export default function ShareReceiver({ onBookAdd }) {
           </div>
         )}
 
-        <button
-          onClick={clearSharedData}
-          style={{
-            backgroundColor: '#666',
-            color: 'white',
-            border: 'none',
-            borderRadius: '6px',
-            padding: '12px 24px',
-          }}
-        >
-          Cancel
-        </button>
+        {importStatus === null && (
+          <button
+            onClick={clearSharedData}
+            style={{
+              backgroundColor: '#666',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              padding: '12px 24px',
+              marginTop: '16px',
+            }}
+          >
+            Cancel
+          </button>
+        )}
       </div>
     </div>
   );
