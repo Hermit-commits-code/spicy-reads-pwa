@@ -1,4 +1,5 @@
 import React, { useRef, useEffect } from 'react';
+import { stopBarcodeScan } from '../../utils/barcodeScanner';
 import {
   Modal,
   ModalOverlay,
@@ -33,7 +34,11 @@ export default function BarcodeScanModal({
 
   // Wrap onClose to also call stopBarcodeScan
   const handleClose = () => {
-    if (stopBarcodeScan) stopBarcodeScan();
+    try {
+      if (typeof stopBarcodeScan === 'function') stopBarcodeScan();
+    } catch (err) {
+      console.warn('stopBarcodeScan failed', err);
+    }
     onClose();
   };
   return (

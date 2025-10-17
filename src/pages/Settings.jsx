@@ -10,12 +10,14 @@ import {
   Text,
 } from '@chakra-ui/react';
 import { useAuth } from '../context/AuthContext';
-import OnboardingModal from '../components/OnboardingModal';
-import BackupRestoreSection from '../components/BackupRestoreSection';
-import CloudBackupSection from '../components/CloudBackupSection';
-import AdminPanel from '../components/AdminPanel';
-import DeleteAccountButton from '../components/DeleteAccountButton';
-import AuthModal from '../components/AuthModal';
+import OnboardingModal from '../components/user/OnboardingModal';
+import BackupRestoreSection from '../components/user/BackupRestoreSection';
+import DeleteAccountButton from '../components/user/DeleteAccountButton';
+import AuthModal from '../components/user/AuthModal';
+import ProfileSection from '../components/user/ProfileSection';
+import DataBackupsSection from '../components/user/DataBackupsSection';
+import AppearanceSection from '../components/user/AppearanceSection';
+import DiagnosticsSection from '../components/user/DiagnosticsSection';
 // import GreetingBar from '../components/GreetingBar';
 import { useSettingsLogic } from './SettingsLogic';
 import {
@@ -23,6 +25,7 @@ import {
   registerServiceWorker,
 } from '../utils/pushNotifications';
 import { useState } from 'react';
+import { db } from '../utils/db';
 
 export default function Settings({ onBooksChanged }) {
   const { user: rawUser, signOut } = useAuth();
@@ -181,32 +184,35 @@ export default function Settings({ onBooksChanged }) {
               </FormControl>
             </Stack>
           </Box>
-          {/* Gold-standard Cloud Backup Section */}
-          <Box
-            p={6}
-            borderWidth={1}
-            borderRadius="lg"
-            bg="white"
-            boxShadow="sm"
-            maxW="600px"
-            mx="auto"
-            w="100%"
-          >
-            <Heading
-              as="h2"
-              size="lg"
-              mb={6}
-              fontWeight="bold"
-              letterSpacing="tight"
-            >
-              Cloud Backup & Restore
-            </Heading>
-            <CloudBackupSection
-              user={user}
-              toast={toast}
-              onBooksChanged={onBooksChanged}
-            />
-          </Box>
+          {/* Profile & Account */}
+          <ProfileSection />
+          {/* Data & Backups (local) */}
+          <DataBackupsSection
+            onRestore={async (data) => {
+              // Simple restore: write books/lists to Dexie (preview first)
+              try {
+                if (data.books) {
+                  await db.books.clear();
+                  for (const b of data.books) await db.books.put(b);
+                }
+                if (data.lists) {
+                  await db.lists.clear();
+                  for (const l of data.lists) await db.lists.put(l);
+                }
+                if (data.listBooks) {
+                  await db.listBooks.clear();
+                  for (const lb of data.listBooks) await db.listBooks.put(lb);
+                }
+              } catch (e) {
+                // ignore here; DataBackupsSection will show a toast
+              }
+            }}
+          />
+          {/* Appearance */}
+          <AppearanceSection />
+          {/* Diagnostics & Support */}
+          <DiagnosticsSection />
+          {/* Cloud Backup removed per user request */}
           {/* Push Notifications Section (Premium Only) */}
           <Box
             p={6}
@@ -259,8 +265,6 @@ export default function Settings({ onBooksChanged }) {
           </Box>
           {/* Delete Account Button (all users) */}
           <DeleteAccountButton />
-          {/* Admin Panel (only for admins) */}
-          {isAdmin && <AdminPanel />}
         </Stack>
       )}
       <OnboardingModal

@@ -10,7 +10,7 @@ export default function GenreField({
   genres,
 }) {
   return (
-    <>
+    <div>
       <FormControl isRequired>
         <FormLabel htmlFor="book-genre-input">{t('book_genre')}</FormLabel>
         <Select
@@ -25,8 +25,8 @@ export default function GenreField({
           aria-label={t('book_genre')}
           size="md"
         >
-          {genres.map((g) => (
-            <option key={g.value} value={g.value}>
+          {genres.map((g, idx) => (
+            <option key={g.value || idx} value={g.value}>
               {g.label}
             </option>
           ))}
@@ -49,13 +49,13 @@ export default function GenreField({
           {genre &&
             genres
               .find((g) => g.value === genre)
-              ?.subGenres.map((sg) => (
-                <option key={sg} value={sg}>
+              ?.subGenres.map((sg, idx) => (
+                <option key={sg || idx} value={sg}>
                   {sg}
                 </option>
               ))}
         </Select>
       </FormControl>
-    </>
+    </div>
   );
 }

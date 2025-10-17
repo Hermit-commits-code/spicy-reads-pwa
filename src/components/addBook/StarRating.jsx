@@ -3,7 +3,7 @@ import { HStack, IconButton, FormControl, FormLabel } from '@chakra-ui/react';
 import { FaStar } from 'react-icons/fa';
 
 export default function StarRating({
-  t,
+  t = (x) => x,
   rating,
   setRating,
   max = 5,

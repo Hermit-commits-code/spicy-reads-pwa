@@ -1,10 +1,13 @@
-import BookDetailsModal from '../components/BookDetailsModal';
+import BookDetailsModal from '../components/bookDetails/BookDetailsModal';
+import AddBookModal from '../components/addBook/AddBookModal';
+import { IconButton, useToast } from '@chakra-ui/react';
+import { FiPlus } from 'react-icons/fi';
 import React, { useState, useRef } from 'react';
 import { getRecommendedBooks } from '../utils/recommendations';
 import { useTranslation } from 'react-i18next';
 import { Box } from '@chakra-ui/react';
-import RecommendedShelf from '../components/RecommendedShelf';
-import GenreShelf from '../components/GenreShelf';
+import RecommendedShelf from '../components/bookDetails/RecommendedShelf';
+import GenreShelf from '../components/bookDetails/GenreShelf';
 
 const COMMON_MOODS = [
   'Cozy',
@@ -25,6 +28,7 @@ export default function Home({
   onEditBook,
   onDeleteBook,
   autoOpenAddBook,
+  onAddBook, // optional callback for parent to update books
 }) {
   const { t } = useTranslation();
   // Use theme tokens for colors
@@ -33,15 +37,15 @@ export default function Home({
   const text = 'gray.700';
   const [selectedBook, setSelectedBook] = useState(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [addBookOpen, setAddBookOpen] = useState(false);
+  const toast = useToast();
   // Track if an edit just completed to block details modal
   const justEditedRef = useRef(false);
 
   // Auto-open add book modal
   React.useEffect(() => {
     if (autoOpenAddBook) {
-      // Trigger the floating add book button click
-      const event = new CustomEvent('openAddBook');
-      window.dispatchEvent(event);
+      setAddBookOpen(true);
     }
   }, [autoOpenAddBook]);
   const recommended = getRecommendedBooks(books, { max: 5 });
@@ -104,6 +108,7 @@ export default function Home({
       px={{ base: 4, md: 8 }}
       maxW={{ base: '100%', md: '900px' }}
       mx="auto"
+      position="relative"
     >
       <RecommendedShelf
         recommended={recommended}
@@ -129,6 +134,35 @@ export default function Home({
         book={selectedBook}
         opened={detailsOpen}
         onClose={handleCloseDetails}
+      />
+      {/* Floating Add Book Button */}
+      <IconButton
+        icon={<FiPlus />}
+        colorScheme="red"
+        aria-label="Add Book"
+        size="lg"
+        position="fixed"
+        bottom={{ base: 20, md: 24 }}
+        right={{ base: 6, md: 10 }}
+        borderRadius="full"
+        boxShadow="lg"
+        zIndex={100}
+        onClick={() => setAddBookOpen(true)}
+        _hover={{ bg: 'red.400' }}
+      />
+      <AddBookModal
+        opened={addBookOpen}
+        onClose={() => setAddBookOpen(false)}
+        onAdd={async (book) => {
+          setAddBookOpen(false);
+          toast({
+            title: t('Book added!'),
+            status: 'success',
+            duration: 2000,
+            isClosable: true,
+          });
+          if (onAddBook) onAddBook(book);
+        }}
       />
     </Box>
   );

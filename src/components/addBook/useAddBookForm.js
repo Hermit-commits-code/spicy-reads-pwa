@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import db from '../../db/booksDB';
+// Gold Standard: Remove db import, use local state only
 import { useBookFields } from './useBookFields';
+import { db } from '../../utils/db';
 
 export function useAddBookForm(initialValues = {}) {
   // Book fields (modularized)

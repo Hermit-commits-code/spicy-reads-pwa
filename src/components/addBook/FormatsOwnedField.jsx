@@ -9,7 +9,7 @@ import {
   HStack,
   Box,
 } from '@chakra-ui/react';
-import { FORMAT_COLORS } from '../FormatTag';
+import { FORMAT_COLORS } from '../../components/bookDetails/FormatTag';
 
 const FORMAT_OPTIONS = [
   { value: 'physical', label: 'Physical' },

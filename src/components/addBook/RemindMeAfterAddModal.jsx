@@ -9,7 +9,7 @@ import {
   Button,
   Text,
 } from '@chakra-ui/react';
-import SetReminderButton from '../SetReminderButton';
+import SetReminderButton from '../../components/social/SetReminderButton';
 
 export default function RemindMeAfterAddModal({ isOpen, onClose, book }) {
   return (

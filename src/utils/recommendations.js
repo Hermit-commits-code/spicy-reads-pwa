@@ -15,8 +15,18 @@ function getRecommendedBooks(books, options = {}) {
     recentOnly = false,
   } = options;
 
+  // If recentOnly is requested, keep only books read in the last year
+  const ONE_YEAR_MS = 1000 * 60 * 60 * 24 * 365;
+  const now = Date.now();
+  const candidates = recentOnly
+    ? books.filter(
+        (b) =>
+          b.lastRead && now - new Date(b.lastRead).getTime() <= ONE_YEAR_MS,
+      )
+    : books;
+
   // 1. Find books the user has read/rated highly
-  const rated = books.filter((b) => b.rating && b.rating >= 4);
+  const rated = candidates.filter((b) => b.rating && b.rating >= 4);
   // 2. Aggregate tag/mood/genre preferences
   const tagCounts = {};
   rated.forEach((b) => {
@@ -33,7 +43,7 @@ function getRecommendedBooks(books, options = {}) {
       tagCounts['spice:' + b.spice] = (tagCounts['spice:' + b.spice] || 0) + 1;
   });
   // 3. Score all books by tag overlap
-  const scored = books.map((b) => {
+  const scored = candidates.map((b) => {
     let score = 0;
     (b.moods || []).forEach((m) => {
       score += tagCounts[m] || 0;

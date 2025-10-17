@@ -32,11 +32,12 @@ export default function FormModal({
           }}
         >
           <ModalBody>
-            {React.Children.map(children, (child) =>
-              React.isValidElement(child)
-                ? React.cloneElement(child, { idPrefix })
-                : child,
-            )}
+            {React.Children.map(children, (child) => {
+              if (!React.isValidElement(child)) return child;
+              // Only add idPrefix to non-fragment elements
+              if (child.type === React.Fragment) return child;
+              return React.cloneElement(child, { idPrefix });
+            })}
           </ModalBody>
           <ModalFooter>
             <Button colorScheme="blue" mr={3} type="submit">

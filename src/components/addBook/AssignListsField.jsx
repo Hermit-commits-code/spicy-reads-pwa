@@ -24,7 +24,15 @@ import {
   IconButton,
 } from '@chakra-ui/react';
 import { AddIcon, ChevronDownIcon } from '@chakra-ui/icons';
-import db from '../../db/booksDB';
+// import db from '../../db/booksDB';
+const db = {
+  lists: {
+    add: async (list) => {
+      // Mock implementation for adding a list
+      return Promise.resolve(Math.random().toString(36).substr(2, 9)); // Mock ID
+    },
+  },
+};
 
 export default function AssignListsField({
   t,

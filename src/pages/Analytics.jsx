@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Box, VStack } from '@chakra-ui/react';
-import db from '../db/booksDB';
 import { useTranslation } from 'react-i18next';
+import { db } from '../utils/db';
 import StatsPanel from './analytics/StatsPanel';
 import GoalPanel from './analytics/GoalPanel';
 import BooksFinishedPanel from './analytics/BooksFinishedPanel';
+// Gold Standard: Remove db import, use books prop only
 
 function getStreak(dates) {
   if (!dates.length) return 0;

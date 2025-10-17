@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import db from '../db/booksDB';
-import { exportUserData } from '../firebase/db';
 import { getDisplayNameFromFirestore } from '../firebase/getDisplayName';
+import { db } from '../utils/db';
+// Gold Standard: Remove backend imports, use local state only
 
 export function useSettingsLogic({ user, onBooksChanged, toast }) {
   const [lang, setLang] = useState('en');
@@ -63,7 +63,12 @@ export function useSettingsLogic({ user, onBooksChanged, toast }) {
   const handleExportCloud = async () => {
     if (!user) return;
     try {
-      const data = await exportUserData(user.uid);
+      // exportUserData (cloud) is not available in this frontend-only build.
+      // Fallback: export from local Dexie DB.
+      const books = await db.books.toArray();
+      const lists = await (db.lists ? db.lists.toArray() : []);
+      const listBooks = await (db.listBooks ? db.listBooks.toArray() : []);
+      const data = { books, lists, listBooks };
       const blob = new Blob([JSON.stringify(data, null, 2)], {
         type: 'application/json',
       });

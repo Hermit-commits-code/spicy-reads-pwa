@@ -1,72 +1,43 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import {
-  onUserStateChanged,
-  signIn,
-  signUp,
-  signInWithGoogle,
-  signOutUser,
-} from '../firebase/auth';
-import { clearUserData } from '../utils/clearUserData';
-import { ensureUserProfile } from '../firebase/userProfile';
-import { doc, getDoc } from 'firebase/firestore';
-import { db as firestoreDb } from '../firebase/db';
+import { db } from '../utils/db';
+// Gold Standard: Persist mock user profile locally in Dexie for offline displayName lookup
 
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [isPremium, setIsPremium] = useState(true); // default true for early access
-
+  // Mock user state: always premium, admin, and signed in
+  const [user] = useState({
+    uid: 'mock-user',
+    displayName: 'Demo User',
+    email: 'demo@spicyreads.com',
+    premium: true,
+    admin: true,
+  });
+  // Persist the user profile into local Dexie users store so other parts of the app
+  // (e.g., SettingsLogic) can read displayName from local DB.
   useEffect(() => {
-    const unsubscribe = onUserStateChanged(async (firebaseUser) => {
-      // If a new user signs in, always clear all local user data first
-      await clearUserData();
-      let mergedUser = firebaseUser;
-      setLoading(false);
-      if (firebaseUser) {
-        await ensureUserProfile(firebaseUser);
-        // Fetch user profile from Firestore and merge admin/premium flags
-        try {
-          const userRef = doc(firestoreDb, 'users', firebaseUser.uid);
-          const userSnap = await getDoc(userRef);
-          if (userSnap.exists()) {
-            const data = userSnap.data();
-            setIsPremium(!!data.premium);
-            mergedUser = { ...firebaseUser, ...data };
-          } else {
-            setIsPremium(true); // fallback
-          }
-        } catch {
-          setIsPremium(true); // fallback
+    async function saveUser() {
+      try {
+        if (user && user.uid) {
+          await db.users.put({
+            uid: user.uid,
+            displayName: user.displayName,
+            email: user.email,
+          });
         }
-      } else {
-        setIsPremium(true); // fallback for logged out
+      } catch (err) {
+        // non-fatal
+         
+        console.error('Failed to persist user to Dexie', err);
       }
-      setUser(mergedUser);
-    });
-    return unsubscribe;
-  }, []);
-
-  // Enhanced signOut: clear all user data and reload
-  const enhancedSignOut = async () => {
-    await signOutUser();
-    await clearUserData();
-    window.location.reload();
-  };
-
+    }
+    saveUser();
+  }, [user]);
+  const [loading] = useState(false);
+  const [isPremium] = useState(true);
+  const signOut = () => {};
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        loading,
-        isPremium,
-        signIn,
-        signUp,
-        signInWithGoogle,
-        signOut: enhancedSignOut,
-      }}
-    >
+    <AuthContext.Provider value={{ user, loading, isPremium, signOut }}>
       {children}
     </AuthContext.Provider>
   );

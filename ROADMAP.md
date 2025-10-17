@@ -64,7 +64,7 @@ A mobile-first book tracking PWA for passionate readers, focused on **spice leve
 
 - [x] Book Details modal & post modal UI/UX (mobile & desktop)
 - [x] "Add to My Lists" logic (from friend post modal)
-- [ ] Undo/feedback for actions (snackbars/toasts)
+- [x] Undo/feedback for actions (snackbars/toasts)
 - [ ] Accessibility & mobile-friendly modals/flows
 - [ ] Onboarding/docs/in-app help for social features
 - [ ] Firestore usage monitoring/optimization

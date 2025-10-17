@@ -9,7 +9,7 @@ import {
   Button,
   Box,
   Text,
-} from "@chakra-ui/react";
+} from '@chakra-ui/react';
 
 /**
  * BarcodeScanModal - Modular modal for barcode scanning.
@@ -29,17 +29,26 @@ export default function BarcodeScanModal({
   t,
   stopBarcodeScan,
 }) {
+  const handleClose = () => {
+    try {
+      if (typeof stopBarcodeScan === 'function') stopBarcodeScan();
+    } catch (e) {
+      console.warn('stopBarcodeScan failed', e);
+    }
+    onClose();
+  };
+
   return (
-    <Modal isOpen={isOpen} onClose={onClose} isCentered size="sm">
+    <Modal isOpen={isOpen} onClose={handleClose} isCentered size="sm">
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>{t("scan_barcode", "Scan Book Barcode")}</ModalHeader>
+        <ModalHeader>{t('scan_barcode', 'Scan Book Barcode')}</ModalHeader>
         <ModalCloseButton onClick={onClose} />
         <ModalBody>
           <Box mb={2}>
             <video
               ref={videoRef}
-              style={{ width: "100%", borderRadius: 8 }}
+              style={{ width: '100%', borderRadius: 8 }}
               autoPlay
               muted
               playsInline
@@ -48,13 +57,13 @@ export default function BarcodeScanModal({
           {barcodeScanError && <Text color="red.500">{barcodeScanError}</Text>}
           <Text fontSize="sm" color="gray.500">
             {t(
-              "scan_barcode_hint",
-              "Point your camera at the barcode (ISBN) on the back of the book."
+              'scan_barcode_hint',
+              'Point your camera at the barcode (ISBN) on the back of the book.',
             )}
           </Text>
         </ModalBody>
         <ModalFooter>
-          <Button onClick={onClose}>{t("cancel")}</Button>
+          <Button onClick={handleClose}>{t('cancel')}</Button>
         </ModalFooter>
       </ModalContent>
     </Modal>

@@ -1,3 +1,4 @@
+import { db } from '../utils/db';
 import {
   Box,
   Input,
@@ -11,9 +12,9 @@ import {
   HStack,
 } from '@chakra-ui/react';
 import { useState, useEffect } from 'react';
-import db from '../db/booksDB';
 
 export default function Search({ books }) {
+  const safeBooks = Array.isArray(books) ? books : [];
   const [search, setSearch] = useState('');
   const [genreFilter, setGenreFilter] = useState('');
   const [spiceFilter, setSpiceFilter] = useState(0);
@@ -25,7 +26,7 @@ export default function Search({ books }) {
     db.lists.toArray().then(setLists);
   }, []);
 
-  const filteredBooks = books.filter((book) => {
+  const filteredBooks = safeBooks.filter((book) => {
     const matchesSearch =
       !search ||
       book.title.toLowerCase().includes(search.toLowerCase()) ||
@@ -46,7 +47,6 @@ export default function Search({ books }) {
       matchesList
     );
   });
-
   return (
     <Box py={6} px={4}>
       <VStack spacing={4} align="stretch" mb={4}>
@@ -66,13 +66,13 @@ export default function Search({ books }) {
           aria-label="Filter by genre"
           size="md"
         >
-          {Array.from(new Set(books.map((b) => b.genre).filter(Boolean))).map(
-            (g) => (
-              <option key={g} value={g}>
-                {g}
-              </option>
-            ),
-          )}
+          {Array.from(
+            new Set(safeBooks.map((b) => b.genre).filter(Boolean)),
+          ).map((g) => (
+            <option key={g} value={g}>
+              {g}
+            </option>
+          ))}
         </Select>
         <Select
           placeholder="All lists"

@@ -1,0 +1,27 @@
+/* Appearance helpers applied by AppearanceSection
+   - --app-font-scale: percentage applied to root font-size (e.g., 100% default)
+   - .sr-high-contrast toggles higher contrast colors
+*/
+:root {
+  --app-font-scale: 100%;
+}
+html {
+  /* adjust base font scaling */
+  font-size: calc(16px * (var(--app-font-scale, 100%) / 100));
+}
+/* high contrast helper - you may want to refine these styles to match theme */
+.sr-high-contrast {
+  background-color: #000 !important;
+  color: #fff !important;
+}
+.sr-high-contrast a {
+  color: #ffd54f !important;
+}
+
+/* reduced-motion respects prefers-reduced-motion; this just provides a helper */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}

@@ -1,4 +1,4 @@
-import db from '../db/booksDB';
+import { db } from './db';
 
 export async function clearUserData({ clearOnboarding = false } = {}) {
   // Clear IndexedDB

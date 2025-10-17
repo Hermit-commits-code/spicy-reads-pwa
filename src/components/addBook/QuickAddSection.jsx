@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Text } from '@chakra-ui/react';
-import QuickAddBook from '../QuickAddBook';
+import QuickAddBook from './QuickAddBook';
 
 export default function QuickAddSection({
   isEdit,

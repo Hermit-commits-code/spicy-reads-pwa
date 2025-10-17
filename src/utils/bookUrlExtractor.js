@@ -54,6 +54,7 @@ const BOOK_URL_PATTERNS = {
           }
         } catch (e) {
           // Ignore Open Library errors, fallback to URL parsing
+          console.warn('Open Library fetch failed:', e);
         }
 
         return {

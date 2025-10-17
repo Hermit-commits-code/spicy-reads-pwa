@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 // import { fetchFeedPosts } from '../firebase/socialFeed';
-import { fetchPrivateFeedPosts } from '../firebase/privateFeed';
-import { fetchDirectShares } from '../firebase/directShares';
-import SocialFeed from '../components/SocialFeed';
-import FriendsPanel from '../components/FriendsPanel';
-import NotificationsPanel from '../components/NotificationsPanel';
+// import { fetchPrivateFeedPosts } from '../firebase/privateFeed';
+// import { fetchDirectShares } from '../firebase/directShares';
+import SocialFeed from '../components/social/SocialFeed';
+import FriendsPanel from '../components/social/FriendsPanel';
+import NotificationsPanel from '../components/social/NotificationsPanel';
 import {
   Box,
   Heading,
@@ -46,58 +46,54 @@ export default function Social() {
 
   // Load friends feed (aggregate all friends' private posts)
   useEffect(() => {
-    async function loadFriendsFeed() {
-      if (!user) return;
-      setFriendsLoading(true);
-      setFriendsError('');
-      try {
-        // Get friend IDs
-        const res = await import('../firebase/friends');
-        const { getUserProfile } = await import('../firebase/userProfile');
-        const friends = await res.getFriends(user.uid);
-        let allPosts = [];
-        for (const friend of friends) {
-          // Limit to 10 most recent posts per friend for performance
-          const posts = await fetchPrivateFeedPosts(friend.id);
-          const profile = await getUserProfile(friend.id);
-          allPosts = allPosts.concat(
-            posts.slice(0, 10).map((p) => ({
-              ...p,
-              userId: friend.id,
-              userName: profile?.displayName || profile?.email || friend.id,
-              userPhotoUrl: profile?.photoURL || null,
-            })),
-          );
-        }
-        // Sort by timestamp desc
-        allPosts.sort(
-          (a, b) =>
-            (b.timestamp?.toMillis?.() || 0) - (a.timestamp?.toMillis?.() || 0),
-        );
-        setFriendsPosts(allPosts);
-      } catch (e) {
-        setFriendsError('Failed to load friends feed.');
-      }
+    // Mock friends feed for frontend-only
+    if (!user) return;
+    setFriendsLoading(true);
+    setFriendsError('');
+    setTimeout(() => {
+      // Example mock data
+      const mockFriends = [
+        { id: 'friend1', name: 'Alice', photoURL: null },
+        { id: 'friend2', name: 'Bob', photoURL: null },
+      ];
+      let allPosts = [];
+      mockFriends.forEach((friend) => {
+        const posts = [
+          {
+            id: `${friend.id}-post1`,
+            content: `A book update from ${friend.name}`,
+            timestamp: Date.now(),
+            userId: friend.id,
+            userName: friend.name,
+            userPhotoUrl: friend.photoURL,
+          },
+        ];
+        allPosts = allPosts.concat(posts);
+      });
+      // Sort by timestamp desc
+      allPosts.sort((a, b) => b.timestamp - a.timestamp);
+      setFriendsPosts(allPosts);
       setFriendsLoading(false);
-    }
-    if (user) loadFriendsFeed();
+    }, 500);
   }, [user]);
 
   // Load direct shares
   useEffect(() => {
-    async function loadDirectShares() {
-      if (!user) return;
-      setDirectLoading(true);
-      setDirectError('');
-      try {
-        const data = await fetchDirectShares(user.uid);
-        setDirectShares(data);
-      } catch (e) {
-        setDirectError('Failed to load direct shares.');
-      }
+    // Mock direct shares for frontend-only
+    if (!user) return;
+    setDirectLoading(true);
+    setDirectError('');
+    setTimeout(() => {
+      const mockShares = [
+        {
+          id: 'share1',
+          content: 'A book shared with you!',
+          timestamp: Date.now(),
+        },
+      ];
+      setDirectShares(mockShares);
       setDirectLoading(false);
-    }
-    if (user) loadDirectShares();
+    }, 500);
   }, [user]);
 
   return (
@@ -200,3 +196,4 @@ export default function Social() {
     </Box>
   );
 }
+// Duplicate block removed — keep single implementation above

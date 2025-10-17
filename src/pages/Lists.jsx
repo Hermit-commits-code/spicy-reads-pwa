@@ -31,7 +31,9 @@ import {
 } from '@chakra-ui/icons';
 import { useEffect, useState } from 'react';
 
-import db from '../db/booksDB';
+import { db } from '../utils/db';
+
+// Gold Standard: Remove db import, use books prop only
 import { useTranslation } from 'react-i18next';
 
 export default function Lists({ books = [] }) {

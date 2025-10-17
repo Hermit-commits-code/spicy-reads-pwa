@@ -11,7 +11,7 @@ import { FaPepperHot } from 'react-icons/fa';
 const spiceLabels = ['None', 'Mild', 'Medium', 'Hot', 'Inferno'];
 
 export default function SpiceMeter({
-  t,
+  t = (x) => x,
   spice,
   setSpice,
   max = 5,
