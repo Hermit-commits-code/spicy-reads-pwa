@@ -102,16 +102,69 @@ export default function FriendsPanel() {
     await acceptFriendRequest(user.uid, requestId, req.from);
     setRequests(requests.filter((r) => r.id !== requestId));
     setFriends(await getFriends(user.uid));
+    toast({
+      title: 'Friend request accepted!',
+      status: 'success',
+      duration: 3000,
+    });
   };
 
   const handleReject = async (requestId) => {
     await rejectFriendRequest(user.uid, requestId);
     setRequests(requests.filter((r) => r.id !== requestId));
+    toast({
+      title: 'Friend request rejected.',
+      status: 'info',
+      duration: 3000,
+    });
   };
 
   const handleRemove = async (friendId) => {
-    await removeFriend(user.uid, friendId);
-    setFriends(await getFriends(user.uid));
+    // Store friend info for undo
+    const removedFriend = friends.find((f) => f.id === friendId);
+    try {
+      await removeFriend(user.uid, friendId);
+      setFriends(await getFriends(user.uid));
+      toast({
+        title: 'Friend removed.',
+        status: 'warning',
+        duration: 5000,
+        isClosable: true,
+        description: removedFriend
+          ? `${
+              removedFriend.displayName ||
+              removedFriend.email ||
+              removedFriend.id
+            } removed.`
+          : undefined,
+        // Gold-standard undo: re-add friend
+        action: (
+          <Button
+            size="xs"
+            colorScheme="green"
+            onClick={async () => {
+              await sendFriendRequest(user.uid, friendId);
+              setFriends(await getFriends(user.uid));
+              toast({
+                title: 'Friend re-added!',
+                status: 'success',
+                duration: 3000,
+              });
+            }}
+          >
+            Undo
+          </Button>
+        ),
+      });
+    } catch (error) {
+      toast({
+        title: 'Error removing friend',
+        description: error.message || 'Missing or insufficient permissions.',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+    }
   };
 
   if (!user) return <Text>Please sign in to manage friends.</Text>;

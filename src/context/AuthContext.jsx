@@ -18,7 +18,6 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [isPremium, setIsPremium] = useState(true); // default true for early access
 
-
   useEffect(() => {
     const unsubscribe = onUserStateChanged(async (firebaseUser) => {
       // If a new user signs in, always clear all local user data first

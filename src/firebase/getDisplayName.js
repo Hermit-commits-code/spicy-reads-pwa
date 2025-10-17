@@ -7,9 +7,7 @@ export async function getDisplayNameFromFirestore(uid) {
   const userSnap = await getDoc(userRef);
   if (userSnap.exists()) {
     const data = userSnap.data();
-    console.log('[FIRESTORE] Read displayName for', uid, ':', data.displayName);
     return data.displayName || null;
   }
-  console.log('[FIRESTORE] No user doc for', uid);
   return null;
 }

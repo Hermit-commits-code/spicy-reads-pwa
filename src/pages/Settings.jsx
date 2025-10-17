@@ -25,7 +25,7 @@ import {
 import { useState } from 'react';
 
 export default function Settings({ onBooksChanged }) {
-  const { user: rawUser } = useAuth();
+  const { user: rawUser, signOut } = useAuth();
   // TEMP: Add a premium flag for demo; replace with real premium check
   const user = rawUser
     ? { ...rawUser, premium: rawUser?.premium ?? true }
@@ -104,7 +104,7 @@ export default function Settings({ onBooksChanged }) {
             variant="outline"
             size="md"
             mt={3}
-            onClick={useAuth().signOut}
+            onClick={signOut}
             leftIcon={<i className="fi fi-rr-sign-out" />}
           >
             Sign Out

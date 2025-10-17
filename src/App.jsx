@@ -7,15 +7,114 @@ function AdminLayout() {
       <AdminSidebar />
       <Box flex="1">
         <Routes>
-          <Route path="/admin/users" element={isAdmin ? <AdminUserDashboard /> : <Text p={8} color="red.500">Access denied: Admins only.</Text>} />
-          <Route path="/admin/moderation" element={isAdmin ? <AdminContentModeration /> : <Text p={8} color="red.500">Access denied: Admins only.</Text>} />
-          <Route path="/admin/analytics" element={isAdmin ? <AdminAnalyticsDashboard /> : <Text p={8} color="red.500">Access denied: Admins only.</Text>} />
-          <Route path="/admin/system" element={isAdmin ? <AdminSystemHealth /> : <Text p={8} color="red.500">Access denied: Admins only.</Text>} />
-          <Route path="/admin/controls" element={isAdmin ? <AdminControls /> : <Text p={8} color="red.500">Access denied: Admins only.</Text>} />
-          <Route path="/admin/audit" element={isAdmin ? <AdminAuditLog /> : <Text p={8} color="red.500">Access denied: Admins only.</Text>} />
-          <Route path="/admin/notifications" element={isAdmin ? <AdminNotifications /> : <Text p={8} color="red.500">Access denied: Admins only.</Text>} />
-          <Route path="/admin/announcements" element={isAdmin ? <AdminAnnouncements /> : <Text p={8} color="red.500">Access denied: Admins only.</Text>} />
-          <Route path="/admin/support" element={isAdmin ? <AdminSupportDesk /> : <Text p={8} color="red.500">Access denied: Admins only.</Text>} />
+          <Route
+            path="/admin/users"
+            element={
+              isAdmin ? (
+                <AdminUserDashboard />
+              ) : (
+                <Text p={8} color="red.500">
+                  Access denied: Admins only.
+                </Text>
+              )
+            }
+          />
+          <Route
+            path="/admin/moderation"
+            element={
+              isAdmin ? (
+                <AdminContentModeration />
+              ) : (
+                <Text p={8} color="red.500">
+                  Access denied: Admins only.
+                </Text>
+              )
+            }
+          />
+          <Route
+            path="/admin/analytics"
+            element={
+              isAdmin ? (
+                <AdminAnalyticsDashboard />
+              ) : (
+                <Text p={8} color="red.500">
+                  Access denied: Admins only.
+                </Text>
+              )
+            }
+          />
+          <Route
+            path="/admin/system"
+            element={
+              isAdmin ? (
+                <AdminSystemHealth />
+              ) : (
+                <Text p={8} color="red.500">
+                  Access denied: Admins only.
+                </Text>
+              )
+            }
+          />
+          <Route
+            path="/admin/controls"
+            element={
+              isAdmin ? (
+                <AdminControls />
+              ) : (
+                <Text p={8} color="red.500">
+                  Access denied: Admins only.
+                </Text>
+              )
+            }
+          />
+          <Route
+            path="/admin/audit"
+            element={
+              isAdmin ? (
+                <AdminAuditLog />
+              ) : (
+                <Text p={8} color="red.500">
+                  Access denied: Admins only.
+                </Text>
+              )
+            }
+          />
+          <Route
+            path="/admin/notifications"
+            element={
+              isAdmin ? (
+                <AdminNotifications />
+              ) : (
+                <Text p={8} color="red.500">
+                  Access denied: Admins only.
+                </Text>
+              )
+            }
+          />
+          <Route
+            path="/admin/announcements"
+            element={
+              isAdmin ? (
+                <AdminAnnouncements />
+              ) : (
+                <Text p={8} color="red.500">
+                  Access denied: Admins only.
+                </Text>
+              )
+            }
+          />
+          <Route
+            path="/admin/support"
+            element={
+              isAdmin ? (
+                <AdminSupportDesk />
+              ) : (
+                <Text p={8} color="red.500">
+                  Access denied: Admins only.
+                </Text>
+              )
+            }
+          />
         </Routes>
         <BottomNav />
       </Box>
@@ -57,7 +156,7 @@ import OnboardingModal from './components/OnboardingModal';
 import AuthModal from './components/AuthModal';
 import { useAuth } from './context/AuthContext';
 import EditBookPage from './pages/EditBookPage';
-import AdminUserDashboard from './components/AdminUserDashboard';
+import AdminUserDashboard from './components/admin/userManagement/AdminUserDashboard';
 import Home from './pages/Home';
 import Lists from './pages/Lists';
 import Settings from './pages/Settings';
